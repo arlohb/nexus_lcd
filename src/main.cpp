@@ -1,32 +1,11 @@
-#include <fmt/core.h>
-#include <Arduino.h>
-#include <TFT_eSPI.h>
+#include "Program.h"
 
-TFT_eSPI display;
+Program program;
 
 void setup() {
-    Serial.begin(115200);
-    Serial.println("Setting up display...");
-    display.begin();
-
-    pinMode(TFT_BL, OUTPUT);
-    analogWrite(TFT_BL, 255);
-    
-    Serial.println("Setup complete");
+    program.setup();
 }
-
-bool flip = false;
 
 void loop() {
-    Serial.println("loop");
-
-    if (flip) {
-        display.fillScreen(TFT_RED);
-    } else {
-        display.fillScreen(TFT_BLUE);
-    }
-    flip = !flip;
-    
-    delay(1000);
+    program.loop();
 }
-
