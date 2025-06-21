@@ -1,5 +1,7 @@
 #include "Program.h"
 
+#include <Arduino.h>
+
 Program program;
 
 void setup() {

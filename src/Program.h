@@ -1,6 +1,6 @@
 #pragma once
 
-#include <TFT_eSPI.h>
+#include <lvgl.h>
 
 class Program {
 public:
@@ -10,7 +10,13 @@ public:
     void loop();
     
 private:
-    TFT_eSPI display;
-
-    bool flip = false;
+    lv_display_t* display;
+    // Isn't the full size of the screen as it is drawn partially
+    lv_color_t colourBuffer[TFT_WIDTH * TFT_HEIGHT / 50];
+    
+    lv_obj_t* btn;
+    lv_obj_t* label;
+    lv_obj_t* animatedBtn;
+    
+    unsigned int lastMillis = 0;
 };
