@@ -23,19 +23,23 @@ Ui::Ui() {
     lv_obj_set_size(cpuUsageArc, TFT_WIDTH - 20, TFT_HEIGHT - 20);
     lv_arc_set_rotation(cpuUsageArc, 135);
     lv_arc_set_bg_angles(cpuUsageArc, 0, 270);
+    lv_arc_set_value(cpuUsageArc, 0);
     lv_obj_center(cpuUsageArc);
     
     memUsageBar = lv_bar_create(root);
     lv_obj_align(memUsageBar, LV_ALIGN_CENTER, 0, 0);
     lv_obj_set_size(memUsageBar, lv_pct(70), 32);
+    lv_bar_set_value(memUsageBar, 0, LV_ANIM_OFF);
     
     testBar1 = lv_bar_create(root);
     lv_obj_align(testBar1, LV_ALIGN_CENTER, 0, 36);
     lv_obj_set_size(testBar1, lv_pct(60), 24);
+    lv_bar_set_value(testBar1, 0, LV_ANIM_OFF);
     
     testBar2 = lv_bar_create(root);
     lv_obj_align(testBar2, LV_ALIGN_CENTER, 0, -36);
     lv_obj_set_size(testBar2, lv_pct(60), 24);
+    lv_bar_set_value(testBar2, 0, LV_ANIM_OFF);
     
     cpuUsageLabel = lv_label_create(root);
     lv_label_set_text(cpuUsageLabel, "CPU 0%");
@@ -81,12 +85,14 @@ Ui::Ui() {
     lv_label_set_text(podLabelTitle, "Pods");
     podLabel = lv_label_create(root);
     lv_obj_align(podLabel, LV_ALIGN_BOTTOM_MID, -labelHorSpacing, -labelVerOffset);
+    lv_label_set_text(podLabel, "0");
 
     lv_obj_t* containerLabelTitle = lv_label_create(root);
     lv_obj_align(containerLabelTitle, LV_ALIGN_BOTTOM_MID, labelHorSpacing, -labelVerOffset - labelVerSpacing);
     lv_label_set_text(containerLabelTitle, "Cons");
     containerLabel = lv_label_create(root);
     lv_obj_align(containerLabel, LV_ALIGN_BOTTOM_MID, labelHorSpacing, -labelVerOffset);
+    lv_label_set_text(containerLabel, "0");
 }
 
 void Ui::start(const Data* data) {
