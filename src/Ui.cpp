@@ -106,8 +106,11 @@ void Ui::start(const Data* data) {
         Args* args = static_cast<Args*>(arg);
 
         while (true) {
-            lv_timer_handler();
             args->ui->loop(*args->data);
+
+            // This includes rendering
+            lv_timer_handler();
+
             vTaskDelay(pdMS_TO_TICKS(10));
         }
     }, "lvgl_loop", 8 * 1024, args, 1, nullptr);
