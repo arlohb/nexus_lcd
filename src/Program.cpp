@@ -11,6 +11,7 @@ void Program::setup() {
     Serial.begin(115200);
     Serial.println();
 
+    Serial.println("Initialising backlight pin...");
     pinMode(TFT_BL, OUTPUT);
     analogWrite(TFT_BL, 255);
     
