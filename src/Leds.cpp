@@ -4,11 +4,14 @@
 #include <lvgl.h>
 #include "Utils.h"
 
-Leds::Leds() : np(COUNT, PIN, NEO_GRB + NEO_KHZ800) {}
+Leds::Leds() : np(COUNT, PIN, NEO_GRB + NEO_KHZ800) {
+    np.begin();
+    np.setBrightness(1);
+    np.fill(np.Color(255, 0, 0));
+    np.show();
+}
 
-void Leds::setupAndStartTask(const Data* data) {
-    setup();
-    
+void Leds::start(const Data* data) {
     struct Args {
         Leds* leds;
         const Data* data;
@@ -24,13 +27,6 @@ void Leds::setupAndStartTask(const Data* data) {
             vTaskDelay(pdMS_TO_TICKS(1000));
         }
     }, "leds_loop", 2048, args, 1, nullptr);
-}
-
-void Leds::setup() {
-    np.begin();
-    np.setBrightness(1);
-    np.fill(np.Color(255, 0, 0));
-    np.show();
 }
 
 void Leds::loop(const Data& data) {

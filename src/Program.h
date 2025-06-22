@@ -11,12 +11,12 @@ public:
     Program(const Program&) = delete;
     Program& operator=(const Program&) = delete;
     
-    void startWifi();
-
-    void setup();
+    void start();
 
 private:
     Data data;
     Ui ui;
     Leds leds;
+
+    void startWifi();
 };

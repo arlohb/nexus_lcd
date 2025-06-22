@@ -2,9 +2,7 @@
 
 #include "Utils.h"
 
-Ui::Ui() {}
-
-void Ui::setup() {
+Ui::Ui() {
     Serial.println("Setting up lvgl...");
 
     lv_init();
@@ -91,7 +89,7 @@ void Ui::setup() {
     lv_obj_align(containerLabel, LV_ALIGN_BOTTOM_MID, labelHorSpacing, -labelVerOffset);
 }
 
-void Ui::startTask(const Data* data) {
+void Ui::start(const Data* data) {
     struct Args {
         Ui* ui;
         const Data* data;

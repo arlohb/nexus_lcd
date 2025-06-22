@@ -10,8 +10,7 @@ public:
     Ui(const Ui&) = delete;
     Ui& operator=(const Ui&) = delete;
 
-    void setup();
-    void startTask(const Data* data);
+    void start(const Data* data);
 
 private:
     // Isn't the full size of the screen as it is drawn partially

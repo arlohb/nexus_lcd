@@ -2,11 +2,19 @@
 
 #include <Arduino.h>
 #include <WiFi.h>
-#include <algorithm>
 #include "Utils.h"
 #include "Secrets.h"
 
-Program::Program() {}
+Program::Program() {
+    pinMode(TFT_BL, OUTPUT);
+    analogWrite(TFT_BL, 255);
+}
+
+void Program::start() {
+    startWifi();
+    ui.start(&data);
+    leds.start(&data);
+}
 
 void Program::startWifi() {
     xTaskCreate([] (void* arg) {
@@ -45,25 +53,10 @@ void Program::startWifi() {
             delay(100);
         }
         Serial.println("Connected to WiFi!");
+
+        // Use randomness of WiFi connection time as a seed
+        srand(static_cast<unsigned int>(millis()));
         
         vTaskDelete(nullptr);
     }, "wifi_setup", 4096, nullptr, 1, nullptr);
-}
-
-void Program::setup() {
-    Serial.begin(115200);
-    Serial.println();
-
-    startWifi();
-    leds.setupAndStartTask(&data);
-
-    Serial.println("Initialising backlight pin...");
-    pinMode(TFT_BL, OUTPUT);
-    analogWrite(TFT_BL, 255);
-    
-    ui.setup();
-    ui.startTask(&data);
-
-    Serial.println("Setup complete");
-    srand(static_cast<unsigned int>(millis()));
 }
