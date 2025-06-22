@@ -1,7 +1,7 @@
 #include "Program.h"
 
 #include <Arduino.h>
-#include <ESP8266WiFi.h>
+#include <WiFi.h>
 #include "Utils.h"
 #include "Secrets.h"
 
