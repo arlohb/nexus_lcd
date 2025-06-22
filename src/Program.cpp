@@ -55,7 +55,7 @@ void Program::setup() {
     lv_obj_align(cpuUsageLabel, LV_ALIGN_TOP_MID, 0, 40);
     lv_obj_set_style_text_color(cpuUsageLabel, lv_color_white(), LV_PART_MAIN);
     
-    memUsageLabel = lv_label_create(memUsageBar);
+    lv_obj_t* memUsageLabel = lv_label_create(memUsageBar);
     lv_label_set_text(memUsageLabel, "Mem");
     lv_obj_align(memUsageLabel, LV_ALIGN_LEFT_MID, 8, 0);
     lv_obj_set_style_text_color(memUsageLabel, lv_color_white(), LV_PART_MAIN);
@@ -65,7 +65,7 @@ void Program::setup() {
     lv_obj_align(memUsageValue, LV_ALIGN_RIGHT_MID, -8, 0);
     lv_obj_set_style_text_color(memUsageValue, lv_color_white(), LV_PART_MAIN);
     
-    testBarLabel1 = lv_label_create(testBar1);
+    lv_obj_t* testBarLabel1 = lv_label_create(testBar1);
     lv_label_set_text(testBarLabel1, "T1");
     lv_obj_align(testBarLabel1, LV_ALIGN_LEFT_MID, 8, 0);
     lv_obj_set_style_text_color(testBarLabel1, lv_color_white(), LV_PART_MAIN);
@@ -75,7 +75,7 @@ void Program::setup() {
     lv_obj_align(testBarValue1, LV_ALIGN_RIGHT_MID, -8, 0);
     lv_obj_set_style_text_color(testBarValue1, lv_color_white(), LV_PART_MAIN);
 
-    testBarLabel2 = lv_label_create(testBar2);
+    lv_obj_t* testBarLabel2 = lv_label_create(testBar2);
     lv_label_set_text(testBarLabel2, "T2");
     lv_obj_align(testBarLabel2, LV_ALIGN_LEFT_MID, 8, 0);
     lv_obj_set_style_text_color(testBarLabel2, lv_color_white(), LV_PART_MAIN);
