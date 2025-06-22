@@ -8,6 +8,9 @@ class Program {
 public:
     Program();
     
+    Program(const Program&) = delete;
+    Program& operator=(const Program&) = delete;
+    
     void setupLvgl();
     void startWifi();
 

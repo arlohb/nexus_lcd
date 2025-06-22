@@ -6,6 +6,9 @@
 class Ui {
 public:
     Ui();
+    
+    Ui(const Ui&) = delete;
+    Ui& operator=(const Ui&) = delete;
 
     void setup();
     void loop(const Data& data);

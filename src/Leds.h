@@ -10,6 +10,9 @@ public:
 
     Leds();
     
+    Leds(const Leds&) = delete;
+    Leds& operator=(const Leds&) = delete;
+    
     void setupAndStartTask(const Data* data);
     
 private:

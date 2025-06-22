@@ -9,6 +9,9 @@ class Data {
 public:
     Data();
     
+    Data(const Data&) = delete;
+    Data& operator=(const Data&) = delete;
+    
     std::atomic<uint8_t> cpuUsage;
     std::atomic<uint8_t> memUsage;
     std::atomic<uint16_t> podCount;
