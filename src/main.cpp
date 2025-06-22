@@ -2,12 +2,14 @@
 
 #include <Arduino.h>
 
-Program program;
+extern "C" void app_main() {
+    initArduino();
 
-void setup() {
+    Program program;
     program.setup();
-}
 
-void loop() {
-    program.loop();
+    while (true) {
+        program.loop();
+        delay(1);
+    }
 }
