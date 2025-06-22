@@ -75,6 +75,18 @@ Data::Data() :
             }
         }, "data_test_value_2", TASK_STACK_SIZE, data, 1, nullptr);
         
+        xTaskCreate([] (void* arg) {
+            Data* data = reinterpret_cast<Data*>(arg);
+            while (true) {
+                {
+                    std::lock_guard<std::mutex> lock(data->podDataMutex);
+                    data->podDataNormalised = data->getPodDateNormalised();
+                }
+                Serial.println("Pod data updated");
+                vTaskDelay(pdMS_TO_TICKS(5000));
+            }
+        }, "data_pod_data", TASK_STACK_SIZE, data, 1, nullptr);
+        
         vTaskDelete(nullptr);
     }, "data_task_creator", 1024, this, 1, nullptr);
 }
@@ -107,7 +119,7 @@ int Data::getTestValue2() {
     return rand() % 100;
 }
 
-std::vector<uint8_t> Data::getPodData() const {
+std::vector<uint8_t> Data::getPodData() {
     std::vector<uint8_t> data;
     data.resize(48);
 
@@ -118,7 +130,7 @@ std::vector<uint8_t> Data::getPodData() const {
     return data;
 }
 
-std::vector<uint8_t> Data::getPodDateNormalised() const {
+std::vector<uint8_t> Data::getPodDateNormalised() {
     std::vector<uint8_t> data = getPodData();
 
     uint8_t min = 255;

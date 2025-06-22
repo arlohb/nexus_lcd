@@ -4,6 +4,7 @@
 #include <vector>
 #include <sys/types.h>
 #include <atomic>
+#include <mutex>
 
 class Data {
 public:
@@ -20,9 +21,9 @@ public:
     std::atomic<uint16_t> containerCount;
     std::atomic<uint8_t> testValue1;
     std::atomic<uint8_t> testValue2;
-    
-    std::vector<uint8_t> getPodData() const;
-    std::vector<uint8_t> getPodDateNormalised() const;
+
+    std::mutex podDataMutex;
+    std::vector<uint8_t> podDataNormalised;
 
 private:
     static String promQuery(const String& query);
@@ -34,4 +35,7 @@ private:
     
     static int getTestValue1();
     static int getTestValue2();
+
+    static std::vector<uint8_t> getPodData();
+    static std::vector<uint8_t> getPodDateNormalised();
 };

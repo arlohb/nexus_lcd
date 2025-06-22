@@ -13,10 +13,10 @@ public:
     Leds(const Leds&) = delete;
     Leds& operator=(const Leds&) = delete;
     
-    void start(const Data* data);
+    void start(Data* data);
     
 private:
-    void loop(const Data& data);
+    void loop(Data& data);
 
     Adafruit_NeoPixel np;
 };
