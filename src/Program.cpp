@@ -76,6 +76,11 @@ void Program::setup() {
     Serial.println();
 
     Serial.println("Setup complete");
+    
+    np.begin();
+    np.setBrightness(3);
+    np.fill(np.Color(255, 0, 0));
+    np.show();
 }
 
 void Program::loop() {
