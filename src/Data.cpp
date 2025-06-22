@@ -28,7 +28,7 @@ Data::Data() :
                 Serial.println("Cpu usage updated");
                 vTaskDelay(pdMS_TO_TICKS(5000));
             }
-        }, "data_cpu_usage", 8 * 1024, data, 1, nullptr);
+        }, "data_cpu_usage", TASK_STACK_SIZE, data, 1, nullptr);
         
         xTaskCreate([] (void* arg) {
             Data* data = reinterpret_cast<Data*>(arg);
@@ -37,7 +37,7 @@ Data::Data() :
                 Serial.println("Memory usage updated");
                 vTaskDelay(pdMS_TO_TICKS(5000));
             }
-        }, "data_mem_usage", 8 * 1024, data, 1, nullptr);
+        }, "data_mem_usage", TASK_STACK_SIZE, data, 1, nullptr);
 
         xTaskCreate([] (void* arg) {
             Data* data = reinterpret_cast<Data*>(arg);
@@ -46,7 +46,7 @@ Data::Data() :
                 Serial.println("Pod count updated");
                 vTaskDelay(pdMS_TO_TICKS(5000));
             }
-        }, "data_pod_count", 8 * 1024, data, 1, nullptr);
+        }, "data_pod_count", TASK_STACK_SIZE, data, 1, nullptr);
 
         xTaskCreate([] (void* arg) {
             Data* data = reinterpret_cast<Data*>(arg);
@@ -55,7 +55,7 @@ Data::Data() :
                 Serial.println("Container count updated");
                 vTaskDelay(pdMS_TO_TICKS(5000));
             }
-        }, "data_container_count", 8 * 1024, data, 1, nullptr);
+        }, "data_container_count", TASK_STACK_SIZE, data, 1, nullptr);
 
         xTaskCreate([] (void* arg) {
             Data* data = reinterpret_cast<Data*>(arg);
@@ -64,7 +64,7 @@ Data::Data() :
                 Serial.println("Test value 1 updated");
                 vTaskDelay(pdMS_TO_TICKS(5000));
             }
-        }, "data_test_value_1", 8 * 1024, data, 1, nullptr);
+        }, "data_test_value_1", TASK_STACK_SIZE, data, 1, nullptr);
 
         xTaskCreate([] (void* arg) {
             Data* data = reinterpret_cast<Data*>(arg);
@@ -73,7 +73,7 @@ Data::Data() :
                 Serial.println("Test value 2 updated");
                 vTaskDelay(pdMS_TO_TICKS(5000));
             }
-        }, "data_test_value_2", 8 * 1024, data, 1, nullptr);
+        }, "data_test_value_2", TASK_STACK_SIZE, data, 1, nullptr);
         
         vTaskDelete(nullptr);
     }, "data_task_creator", 1024, this, 1, nullptr);

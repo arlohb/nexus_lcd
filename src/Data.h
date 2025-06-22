@@ -7,6 +7,8 @@
 
 class Data {
 public:
+    static const uint TASK_STACK_SIZE = 16 * 1024;
+
     Data();
     
     Data(const Data&) = delete;
