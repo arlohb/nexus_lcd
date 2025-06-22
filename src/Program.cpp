@@ -8,14 +8,7 @@
 
 Program::Program() {}
 
-void Program::setup() {
-    Serial.begin(115200);
-    Serial.println();
-
-    Serial.println("Initialising backlight pin...");
-    pinMode(TFT_BL, OUTPUT);
-    analogWrite(TFT_BL, 255);
-    
+void Program::setupLvgl() {
     Serial.println("Setting up lvgl...");
 
     lv_init();
@@ -27,9 +20,9 @@ void Program::setup() {
     lv_tick_set_cb([] () { return (unsigned int) millis(); });
 
     lv_tft_espi_create(TFT_WIDTH, TFT_HEIGHT, colourBuffer, sizeof(colourBuffer));
-    
-    ui.setup();
-    
+}
+
+void Program::startWifi() {
     xTaskCreate([] (void* arg) {
         Serial.printf("Connecting to WiFi '%s'...\n", secrets::ssid);
         WiFi.setMinSecurity(WIFI_AUTH_OPEN);
@@ -69,6 +62,20 @@ void Program::setup() {
         
         vTaskDelete(nullptr);
     }, "wifi_setup", 4096, nullptr, 1, nullptr);
+}
+
+void Program::setup() {
+    Serial.begin(115200);
+    Serial.println();
+
+    startWifi();
+
+    Serial.println("Initialising backlight pin...");
+    pinMode(TFT_BL, OUTPUT);
+    analogWrite(TFT_BL, 255);
+    
+    setupLvgl();
+    ui.setup();
 
     Serial.println("Setup complete");
     

@@ -7,6 +7,9 @@
 class Program {
 public:
     Program();
+    
+    void setupLvgl();
+    void startWifi();
 
     void setup();
     void loop();
