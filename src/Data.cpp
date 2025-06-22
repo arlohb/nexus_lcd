@@ -85,10 +85,14 @@ int Data::getContainerCount() {
 }
 
 int Data::getTestValue1() {
+    vTaskDelay(pdMS_TO_TICKS(rand() % 100));
+    srand(millis());
     return rand() % 100;
 }
 
 int Data::getTestValue2() {
+    vTaskDelay(pdMS_TO_TICKS(rand() % 100));
+    srand(millis());
     return rand() % 100;
 }
 
