@@ -15,57 +15,68 @@ Data::Data() :
 {
     xTaskCreate([] (void* arg) {
         Data* data = reinterpret_cast<Data*>(arg);
-        while (true) {
-            data->cpuUsage = getCpuUsage();
-            Serial.println("Cpu usage updated");
-            vTaskDelay(pdMS_TO_TICKS(5000));
-        }
-    }, "data_cpu_usage", 8 * 1024, this, 1, nullptr);
-    
-    xTaskCreate([] (void* arg) {
-        Data* data = reinterpret_cast<Data*>(arg);
-        while (true) {
-            data->memUsage = getMemUsage();
-            Serial.println("Memory usage updated");
-            vTaskDelay(pdMS_TO_TICKS(5000));
-        }
-    }, "data_mem_usage", 8 * 1024, this, 1, nullptr);
 
-    xTaskCreate([] (void* arg) {
-        Data* data = reinterpret_cast<Data*>(arg);
-        while (true) {
-            data->podCount = getPodCount();
-            Serial.println("Pod count updated");
-            vTaskDelay(pdMS_TO_TICKS(5000));
+        // Wait until WiFi is connected
+        while (WiFi.status() != WL_CONNECTED) {
+            vTaskDelay(pdMS_TO_TICKS(100));
         }
-    }, "data_pod_count", 8 * 1024, this, 1, nullptr);
 
-    xTaskCreate([] (void* arg) {
-        Data* data = reinterpret_cast<Data*>(arg);
-        while (true) {
-            data->containerCount = getContainerCount();
-            Serial.println("Container count updated");
-            vTaskDelay(pdMS_TO_TICKS(5000));
-        }
-    }, "data_container_count", 8 * 1024, this, 1, nullptr);
+        xTaskCreate([] (void* arg) {
+            Data* data = reinterpret_cast<Data*>(arg);
+            while (true) {
+                data->cpuUsage = getCpuUsage();
+                Serial.println("Cpu usage updated");
+                vTaskDelay(pdMS_TO_TICKS(5000));
+            }
+        }, "data_cpu_usage", 8 * 1024, data, 1, nullptr);
+        
+        xTaskCreate([] (void* arg) {
+            Data* data = reinterpret_cast<Data*>(arg);
+            while (true) {
+                data->memUsage = getMemUsage();
+                Serial.println("Memory usage updated");
+                vTaskDelay(pdMS_TO_TICKS(5000));
+            }
+        }, "data_mem_usage", 8 * 1024, data, 1, nullptr);
 
-    xTaskCreate([] (void* arg) {
-        Data* data = reinterpret_cast<Data*>(arg);
-        while (true) {
-            data->testValue1 = getTestValue1();
-            Serial.println("Test value 1 updated");
-            vTaskDelay(pdMS_TO_TICKS(5000));
-        }
-    }, "data_test_value_1", 8 * 1024, this, 1, nullptr);
+        xTaskCreate([] (void* arg) {
+            Data* data = reinterpret_cast<Data*>(arg);
+            while (true) {
+                data->podCount = getPodCount();
+                Serial.println("Pod count updated");
+                vTaskDelay(pdMS_TO_TICKS(5000));
+            }
+        }, "data_pod_count", 8 * 1024, data, 1, nullptr);
 
-    xTaskCreate([] (void* arg) {
-        Data* data = reinterpret_cast<Data*>(arg);
-        while (true) {
-            data->testValue2 = getTestValue2();
-            Serial.println("Test value 2 updated");
-            vTaskDelay(pdMS_TO_TICKS(5000));
-        }
-    }, "data_test_value_2", 8 * 1024, this, 1, nullptr);
+        xTaskCreate([] (void* arg) {
+            Data* data = reinterpret_cast<Data*>(arg);
+            while (true) {
+                data->containerCount = getContainerCount();
+                Serial.println("Container count updated");
+                vTaskDelay(pdMS_TO_TICKS(5000));
+            }
+        }, "data_container_count", 8 * 1024, data, 1, nullptr);
+
+        xTaskCreate([] (void* arg) {
+            Data* data = reinterpret_cast<Data*>(arg);
+            while (true) {
+                data->testValue1 = getTestValue1();
+                Serial.println("Test value 1 updated");
+                vTaskDelay(pdMS_TO_TICKS(5000));
+            }
+        }, "data_test_value_1", 8 * 1024, data, 1, nullptr);
+
+        xTaskCreate([] (void* arg) {
+            Data* data = reinterpret_cast<Data*>(arg);
+            while (true) {
+                data->testValue2 = getTestValue2();
+                Serial.println("Test value 2 updated");
+                vTaskDelay(pdMS_TO_TICKS(5000));
+            }
+        }, "data_test_value_2", 8 * 1024, data, 1, nullptr);
+        
+        vTaskDelete(nullptr);
+    }, "data_task_creator", 1024, this, 1, nullptr);
 }
 
 int Data::getCpuUsage() {
