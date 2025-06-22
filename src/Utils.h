@@ -35,4 +35,14 @@ lv_color_t color_hsv_mix(lv_color_t c1, lv_color_t c2, uint8_t t);
  */
 lv_color_t color_temp(int value);
 
+/**
+ * @brief Generates a color representing a temperature value.
+ *
+ * Very similar to color_temp, but with a deep blue.
+ *
+ * @param value Integer value in the range [0, 100].
+ * @return lv_color_t The resulting blended color.
+ */
+lv_color_t color_temp_deep(int value);
+
 }

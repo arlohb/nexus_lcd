@@ -2,6 +2,7 @@
 
 #include <Arduino.h>
 #include <WiFi.h>
+#include <algorithm>
 #include "Utils.h"
 #include "Secrets.h"
 
@@ -78,7 +79,7 @@ void Program::setup() {
     Serial.println("Setup complete");
     
     np.begin();
-    np.setBrightness(3);
+    np.setBrightness(1);
     np.fill(np.Color(255, 0, 0));
     np.show();
 }
@@ -105,6 +106,14 @@ void Program::loop() {
     value = data.getContainerCount();
     lv_label_set_text(containerLabel, String(value).c_str());
     lv_obj_set_style_text_color(containerLabel, utils::color_temp(value), LV_PART_MAIN);
+    
+    auto podData = data.getPodData();
+    for (size_t i = 0; i < std::min(podData.size(), static_cast<size_t>(NP_COUNT)); i++) {
+        uint8_t value = podData[i];
+        lv_color_t color = utils::color_temp_deep(static_cast<uint8_t>((float)value * 100.0f / 255.0f));
+        np.setPixelColor(i, np.Color(color.red, color.green, color.blue));
+    }
+    np.show();
     
     delay(3000);
 }
