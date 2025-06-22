@@ -68,13 +68,41 @@ void Program::setup() {
     containerLabel = lv_label_create(root);
     lv_obj_align(containerLabel, LV_ALIGN_BOTTOM_MID, labelHorSpacing, -labelVerOffset);
     
-    Serial.println("Connecting to WiFi...");
-    WiFi.begin(secrets::ssid ,secrets::password);
+    Serial.printf("Connecting to WiFi '%s'...\n", secrets::ssid);
+    WiFi.setMinSecurity(WIFI_AUTH_OPEN);
+    WiFi.begin(secrets::ssid, secrets::password);
+    
+    wl_status_t lastStatus = static_cast<wl_status_t>(-1);
     while (WiFi.status() != WL_CONNECTED) {
+        if (WiFi.status() != lastStatus) {
+            Serial.printf("Status changed: ");
+            switch (WiFi.status()) {
+                case WL_IDLE_STATUS:
+                    Serial.println("WL_IDLE_STATUS");
+                    break;
+                case WL_NO_SSID_AVAIL:
+                    Serial.println("WL_NO_SSID_AVAIL");
+                    break;
+                case WL_CONNECT_FAILED:
+                    Serial.println("WL_CONNECT_FAILED");
+                    break;
+                case WL_CONNECTION_LOST:
+                    Serial.println("WL_CONNECTION_LOST");
+                    break;
+                case WL_DISCONNECTED:
+                    Serial.println("WL_DISCONNECTED");
+                    break;
+                case WL_CONNECTED:
+                    Serial.println("WL_CONNECTED");
+                    break;
+                default:
+                    Serial.println("Unknown status");
+            }
+            lastStatus = WiFi.status();
+        }
         delay(100);
-        Serial.print(".");
     }
-    Serial.println();
+    Serial.println("Connected to WiFi!");
 
     Serial.println("Setup complete");
     
