@@ -143,6 +143,8 @@ void Program::setup() {
     np.setBrightness(1);
     np.fill(np.Color(255, 0, 0));
     np.show();
+    
+    srand(static_cast<unsigned int>(millis()));
 }
 
 void Program::loop() {
