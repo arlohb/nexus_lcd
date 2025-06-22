@@ -5,7 +5,68 @@
 #include <HTTPClient.h>
 #include "Secrets.h"
 
-Data::Data() {}
+Data::Data() :
+    cpuUsage(0),
+    memUsage(0),
+    podCount(0),
+    containerCount(0),
+    testValue1(0),
+    testValue2(0)
+{
+    xTaskCreate([] (void* arg) {
+        Data* data = reinterpret_cast<Data*>(arg);
+        while (true) {
+            data->cpuUsage = getCpuUsage();
+            Serial.println("Cpu usage updated");
+            vTaskDelay(pdMS_TO_TICKS(5000));
+        }
+    }, "data_cpu_usage", 8 * 1024, this, 1, nullptr);
+    
+    xTaskCreate([] (void* arg) {
+        Data* data = reinterpret_cast<Data*>(arg);
+        while (true) {
+            data->memUsage = getMemUsage();
+            Serial.println("Memory usage updated");
+            vTaskDelay(pdMS_TO_TICKS(5000));
+        }
+    }, "data_mem_usage", 8 * 1024, this, 1, nullptr);
+
+    xTaskCreate([] (void* arg) {
+        Data* data = reinterpret_cast<Data*>(arg);
+        while (true) {
+            data->podCount = getPodCount();
+            Serial.println("Pod count updated");
+            vTaskDelay(pdMS_TO_TICKS(5000));
+        }
+    }, "data_pod_count", 8 * 1024, this, 1, nullptr);
+
+    xTaskCreate([] (void* arg) {
+        Data* data = reinterpret_cast<Data*>(arg);
+        while (true) {
+            data->containerCount = getContainerCount();
+            Serial.println("Container count updated");
+            vTaskDelay(pdMS_TO_TICKS(5000));
+        }
+    }, "data_container_count", 8 * 1024, this, 1, nullptr);
+
+    xTaskCreate([] (void* arg) {
+        Data* data = reinterpret_cast<Data*>(arg);
+        while (true) {
+            data->testValue1 = getTestValue1();
+            Serial.println("Test value 1 updated");
+            vTaskDelay(pdMS_TO_TICKS(5000));
+        }
+    }, "data_test_value_1", 8 * 1024, this, 1, nullptr);
+
+    xTaskCreate([] (void* arg) {
+        Data* data = reinterpret_cast<Data*>(arg);
+        while (true) {
+            data->testValue2 = getTestValue2();
+            Serial.println("Test value 2 updated");
+            vTaskDelay(pdMS_TO_TICKS(5000));
+        }
+    }, "data_test_value_2", 8 * 1024, this, 1, nullptr);
+}
 
 int Data::getCpuUsage() {
     return static_cast<int>(100 * promQuery("cluster:node_cpu:ratio_rate5m").toFloat());
@@ -28,7 +89,7 @@ int Data::getTestValue1() {
 }
 
 int Data::getTestValue2() {
-    return getTestValue1();
+    return rand() % 100;
 }
 
 std::vector<uint8_t> Data::getPodData() {

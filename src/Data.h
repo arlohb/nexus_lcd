@@ -3,22 +3,30 @@
 #include <Arduino.h>
 #include <vector>
 #include <sys/types.h>
+#include <atomic>
 
 class Data {
 public:
     Data();
     
-    int getCpuUsage();
-    int getMemUsage();
-    int getPodCount();
-    int getContainerCount();
-    
-    int getTestValue1();
-    int getTestValue2();
+    std::atomic<uint8_t> cpuUsage;
+    std::atomic<uint8_t> memUsage;
+    std::atomic<uint16_t> podCount;
+    std::atomic<uint16_t> containerCount;
+    std::atomic<uint8_t> testValue1;
+    std::atomic<uint8_t> testValue2;
     
     std::vector<uint8_t> getPodData();
     std::vector<uint8_t> getPodDateNormalised();
 
 private:
-    String promQuery(const String& query);
+    static String promQuery(const String& query);
+
+    static int getCpuUsage();
+    static int getMemUsage();
+    static int getPodCount();
+    static int getContainerCount();
+    
+    static int getTestValue1();
+    static int getTestValue2();
 };

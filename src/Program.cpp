@@ -147,28 +147,37 @@ void Program::setup() {
 
 void Program::loop() {
     lv_timer_handler();
+    
+    if (lv_arc_get_value(cpuUsageArc) != data.cpuUsage) {
+        lv_arc_set_value(cpuUsageArc, data.cpuUsage);
+        lv_obj_set_style_arc_color(cpuUsageArc, utils::color_temp(lv_arc_get_value(cpuUsageArc)), LV_PART_INDICATOR);
+        lv_obj_set_style_bg_color(cpuUsageArc, utils::color_temp(lv_arc_get_value(cpuUsageArc)), LV_PART_KNOB);
+        lv_label_set_text_fmt(cpuUsageLabel, "CPU %d%%", lv_arc_get_value(cpuUsageArc));
+    }
 
-    lv_arc_set_value(cpuUsageArc, data.getCpuUsage());
-    lv_obj_set_style_arc_color(cpuUsageArc, utils::color_temp(lv_arc_get_value(cpuUsageArc)), LV_PART_INDICATOR);
-    lv_obj_set_style_bg_color(cpuUsageArc, utils::color_temp(lv_arc_get_value(cpuUsageArc)), LV_PART_KNOB);
-    lv_label_set_text_fmt(cpuUsageLabel, "CPU %d%%", lv_arc_get_value(cpuUsageArc));
+    if (lv_bar_get_value(memUsageBar) != data.memUsage) {
+        lv_bar_set_value(memUsageBar, data.memUsage, LV_ANIM_OFF);
+        lv_obj_set_style_bg_color(memUsageBar, utils::color_temp(lv_bar_get_value(memUsageBar)), LV_PART_INDICATOR);
+        lv_label_set_text_fmt(memUsageValue, "%d%%", lv_bar_get_value(memUsageBar));
+    }
 
-    lv_bar_set_value(memUsageBar, data.getMemUsage(), LV_ANIM_OFF);
-    lv_obj_set_style_bg_color(memUsageBar, utils::color_temp(lv_bar_get_value(memUsageBar)), LV_PART_INDICATOR);
-    lv_label_set_text_fmt(memUsageValue, "%d%%", lv_bar_get_value(memUsageBar));
+    if (lv_bar_get_value(testBar1) != data.testValue1) {
+        lv_bar_set_value(testBar1, data.testValue1, LV_ANIM_OFF);
+        lv_obj_set_style_bg_color(testBar1, utils::color_temp(lv_bar_get_value(testBar1)), LV_PART_INDICATOR);
+        lv_label_set_text_fmt(testBarValue1, "%d%%", lv_bar_get_value(testBar1));
+    }
 
-    lv_bar_set_value(testBar1, data.getTestValue1(), LV_ANIM_OFF);
-    lv_obj_set_style_bg_color(testBar1, utils::color_temp(lv_bar_get_value(testBar1)), LV_PART_INDICATOR);
-    lv_label_set_text_fmt(testBarValue1, "%d%%", lv_bar_get_value(testBar1));
-
-    lv_bar_set_value(testBar2, data.getTestValue2(), LV_ANIM_OFF);
-    lv_obj_set_style_bg_color(testBar2, utils::color_temp(lv_bar_get_value(testBar2)), LV_PART_INDICATOR);
-    lv_label_set_text_fmt(testBarValue2, "%d%%", lv_bar_get_value(testBar2));
-
-    int value = data.getPodCount();
+    if (lv_bar_get_value(testBar2) != data.testValue2) {
+        lv_bar_set_value(testBar2, data.testValue2, LV_ANIM_OFF);
+        lv_obj_set_style_bg_color(testBar2, utils::color_temp(lv_bar_get_value(testBar2)), LV_PART_INDICATOR);
+        lv_label_set_text_fmt(testBarValue2, "%d%%", lv_bar_get_value(testBar2));
+    }
+    
+    int value = data.podCount;
     lv_label_set_text(podLabel, String(value).c_str());
     lv_obj_set_style_text_color(podLabel, utils::color_temp(value), LV_PART_MAIN);
-    value = data.getContainerCount();
+    
+    value = data.containerCount;
     lv_label_set_text(containerLabel, String(value).c_str());
     lv_obj_set_style_text_color(containerLabel, utils::color_temp(value), LV_PART_MAIN);
     
@@ -179,6 +188,4 @@ void Program::loop() {
         np.setPixelColor(i, np.Color(color.red, color.green, color.blue));
     }
     np.show();
-    
-    delay(3000);
 }
