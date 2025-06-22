@@ -107,7 +107,7 @@ int Data::getTestValue2() {
     return rand() % 100;
 }
 
-std::vector<uint8_t> Data::getPodData() {
+std::vector<uint8_t> Data::getPodData() const {
     std::vector<uint8_t> data;
     data.resize(48);
 
@@ -118,7 +118,7 @@ std::vector<uint8_t> Data::getPodData() {
     return data;
 }
 
-std::vector<uint8_t> Data::getPodDateNormalised() {
+std::vector<uint8_t> Data::getPodDateNormalised() const {
     std::vector<uint8_t> data = getPodData();
 
     uint8_t min = 255;

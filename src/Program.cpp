@@ -76,13 +76,9 @@ void Program::setup() {
     
     setupLvgl();
     ui.setup();
+    leds.setup();
 
     Serial.println("Setup complete");
-    
-    np.begin();
-    np.setBrightness(1);
-    np.fill(np.Color(255, 0, 0));
-    np.show();
     
     srand(static_cast<unsigned int>(millis()));
 }
@@ -91,12 +87,5 @@ void Program::loop() {
     lv_timer_handler();
     
     ui.loop(data);
-    
-    auto podData = data.getPodData();
-    for (size_t i = 0; i < std::min(podData.size(), static_cast<size_t>(NP_COUNT)); i++) {
-        uint8_t value = podData[i];
-        lv_color_t color = utils::color_temp_deep(static_cast<uint8_t>((float)value * 100.0f / 255.0f));
-        np.setPixelColor(i, np.Color(color.red, color.green, color.blue));
-    }
-    np.show();
+    leds.loop(data);
 }

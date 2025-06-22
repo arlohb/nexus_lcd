@@ -16,8 +16,8 @@ public:
     std::atomic<uint8_t> testValue1;
     std::atomic<uint8_t> testValue2;
     
-    std::vector<uint8_t> getPodData();
-    std::vector<uint8_t> getPodDateNormalised();
+    std::vector<uint8_t> getPodData() const;
+    std::vector<uint8_t> getPodDateNormalised() const;
 
 private:
     static String promQuery(const String& query);
