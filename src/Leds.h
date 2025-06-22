@@ -10,9 +10,11 @@ public:
 
     Leds();
     
-    void setup();
-    void loop(const Data& data);
+    void setupAndStartTask(const Data* data);
     
 private:
+    void setup();
+    void loop(const Data& data);
+
     Adafruit_NeoPixel np;
 };

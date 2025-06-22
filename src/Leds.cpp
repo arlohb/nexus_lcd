@@ -6,6 +6,26 @@
 
 Leds::Leds() : np(COUNT, PIN, NEO_GRB + NEO_KHZ800) {}
 
+void Leds::setupAndStartTask(const Data* data) {
+    setup();
+    
+    struct Args {
+        Leds* leds;
+        const Data* data;
+    };
+    
+    Args* args = new Args {this, data};
+
+    xTaskCreate([] (void* arg) {
+        Args* args = static_cast<Args*>(arg);
+
+        while (true) {
+            args->leds->loop(*args->data);
+            vTaskDelay(pdMS_TO_TICKS(1000));
+        }
+    }, "leds_loop", 2048, args, 1, nullptr);
+}
+
 void Leds::setup() {
     np.begin();
     np.setBrightness(1);

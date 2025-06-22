@@ -69,6 +69,7 @@ void Program::setup() {
     Serial.println();
 
     startWifi();
+    leds.setupAndStartTask(&data);
 
     Serial.println("Initialising backlight pin...");
     pinMode(TFT_BL, OUTPUT);
@@ -76,7 +77,6 @@ void Program::setup() {
     
     setupLvgl();
     ui.setup();
-    leds.setup();
 
     Serial.println("Setup complete");
     
@@ -87,5 +87,4 @@ void Program::loop() {
     lv_timer_handler();
     
     ui.loop(data);
-    leds.loop(data);
 }
