@@ -5,11 +5,10 @@
 extern "C" void app_main() {
     initArduino();
 
-    Program program;
-    program.setup();
-
-    while (true) {
-        program.loop();
-        delay(1);
-    }
+    Program* program = new Program();
+    program->setup();
+    
+    program->startLvglTask();
+    
+    vTaskDelete(nullptr);
 }

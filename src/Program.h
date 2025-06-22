@@ -15,7 +15,8 @@ public:
     void startWifi();
 
     void setup();
-    void loop();
+    
+    void startLvglTask();
     
 private:
     // Isn't the full size of the screen as it is drawn partially

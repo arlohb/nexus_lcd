@@ -83,8 +83,20 @@ void Program::setup() {
     srand(static_cast<unsigned int>(millis()));
 }
 
-void Program::loop() {
-    lv_timer_handler();
-    
-    ui.loop(data);
+void Program::startLvglTask() {
+    struct Args {
+        Ui* ui;
+        const Data* data;
+    };
+    Args* args = new Args {&ui, &data};
+
+    xTaskCreate([] (void* arg) {
+        Args* args = static_cast<Args*>(arg);
+
+        while (true) {
+            lv_timer_handler();
+            args->ui->loop(*args->data);
+            vTaskDelay(pdMS_TO_TICKS(10));
+        }
+    }, "lvgl_loop", 8 * 1024, args, 1, nullptr);
 }
