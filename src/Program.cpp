@@ -20,7 +20,7 @@ void Program::setup() {
     lv_init();
     
     lv_log_register_print_cb([] (lv_log_level_t level, const char* msg) {
-        Serial.println(msg);
+        Serial.print(msg);
     });
 
     lv_tick_set_cb([] () { return (unsigned int) millis(); });
