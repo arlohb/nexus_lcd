@@ -11,9 +11,12 @@ public:
     Ui& operator=(const Ui&) = delete;
 
     void setup();
-    void loop(const Data& data);
+    void startTask(const Data* data);
 
 private:
+    // Isn't the full size of the screen as it is drawn partially
+    lv_color_t colourBuffer[512];
+
     lv_obj_t* cpuUsageArc;
     lv_obj_t* cpuUsageLabel;
     lv_obj_t* memUsageBar;
@@ -24,4 +27,6 @@ private:
     lv_obj_t* testBarValue2;
     lv_obj_t* podLabel;
     lv_obj_t* containerLabel;
+
+    void loop(const Data& data);
 };

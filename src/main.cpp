@@ -8,7 +8,5 @@ extern "C" void app_main() {
     Program* program = new Program();
     program->setup();
     
-    program->startLvglTask();
-    
     vTaskDelete(nullptr);
 }

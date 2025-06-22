@@ -5,6 +5,20 @@
 Ui::Ui() {}
 
 void Ui::setup() {
+    Serial.println("Setting up lvgl...");
+
+    lv_init();
+    
+    lv_log_register_print_cb([] (lv_log_level_t level, const char* msg) {
+        Serial.print(msg);
+    });
+
+    lv_tick_set_cb([] () { return (unsigned int) millis(); });
+
+    lv_tft_espi_create(TFT_WIDTH, TFT_HEIGHT, colourBuffer, sizeof(colourBuffer));
+    
+    Serial.println("Creating UI elements...");
+
     lv_obj_t* root = lv_scr_act();
     
     cpuUsageArc = lv_arc_create(root);
@@ -75,6 +89,24 @@ void Ui::setup() {
     lv_label_set_text(containerLabelTitle, "Cons");
     containerLabel = lv_label_create(root);
     lv_obj_align(containerLabel, LV_ALIGN_BOTTOM_MID, labelHorSpacing, -labelVerOffset);
+}
+
+void Ui::startTask(const Data* data) {
+    struct Args {
+        Ui* ui;
+        const Data* data;
+    };
+    Args* args = new Args {this, data};
+
+    xTaskCreate([] (void* arg) {
+        Args* args = static_cast<Args*>(arg);
+
+        while (true) {
+            lv_timer_handler();
+            args->ui->loop(*args->data);
+            vTaskDelay(pdMS_TO_TICKS(10));
+        }
+    }, "lvgl_loop", 8 * 1024, args, 1, nullptr);
 }
 
 void Ui::loop(const Data& data) {

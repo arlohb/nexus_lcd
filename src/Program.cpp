@@ -8,20 +8,6 @@
 
 Program::Program() {}
 
-void Program::setupLvgl() {
-    Serial.println("Setting up lvgl...");
-
-    lv_init();
-    
-    lv_log_register_print_cb([] (lv_log_level_t level, const char* msg) {
-        Serial.print(msg);
-    });
-
-    lv_tick_set_cb([] () { return (unsigned int) millis(); });
-
-    lv_tft_espi_create(TFT_WIDTH, TFT_HEIGHT, colourBuffer, sizeof(colourBuffer));
-}
-
 void Program::startWifi() {
     xTaskCreate([] (void* arg) {
         Serial.printf("Connecting to WiFi '%s'...\n", secrets::ssid);
@@ -75,28 +61,9 @@ void Program::setup() {
     pinMode(TFT_BL, OUTPUT);
     analogWrite(TFT_BL, 255);
     
-    setupLvgl();
     ui.setup();
+    ui.startTask(&data);
 
     Serial.println("Setup complete");
-    
     srand(static_cast<unsigned int>(millis()));
-}
-
-void Program::startLvglTask() {
-    struct Args {
-        Ui* ui;
-        const Data* data;
-    };
-    Args* args = new Args {&ui, &data};
-
-    xTaskCreate([] (void* arg) {
-        Args* args = static_cast<Args*>(arg);
-
-        while (true) {
-            lv_timer_handler();
-            args->ui->loop(*args->data);
-            vTaskDelay(pdMS_TO_TICKS(10));
-        }
-    }, "lvgl_loop", 8 * 1024, args, 1, nullptr);
 }
