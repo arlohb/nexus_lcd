@@ -24,7 +24,9 @@ Data::Data() :
         xTaskCreate([] (void* arg) {
             Data* data = reinterpret_cast<Data*>(arg);
             while (true) {
-                data->cpuUsage = getCpuUsage();
+                int value = getCpuUsage();
+                if (value < 0) continue;
+                data->cpuUsage = value;
                 Serial.println("Cpu usage updated");
                 vTaskDelay(pdMS_TO_TICKS(5000));
             }
@@ -33,7 +35,9 @@ Data::Data() :
         xTaskCreate([] (void* arg) {
             Data* data = reinterpret_cast<Data*>(arg);
             while (true) {
-                data->memUsage = getMemUsage();
+                int value = getMemUsage();
+                if (value < 0) continue;
+                data->memUsage = value;
                 Serial.println("Memory usage updated");
                 vTaskDelay(pdMS_TO_TICKS(5000));
             }
@@ -42,7 +46,9 @@ Data::Data() :
         xTaskCreate([] (void* arg) {
             Data* data = reinterpret_cast<Data*>(arg);
             while (true) {
-                data->podCount = getPodCount();
+                int value = getPodCount();
+                if (value < 0) continue;
+                data->podCount = value;
                 Serial.println("Pod count updated");
                 vTaskDelay(pdMS_TO_TICKS(5000));
             }
@@ -51,7 +57,9 @@ Data::Data() :
         xTaskCreate([] (void* arg) {
             Data* data = reinterpret_cast<Data*>(arg);
             while (true) {
-                data->containerCount = getContainerCount();
+                int value = getContainerCount();
+                if (value < 0) continue;
+                data->containerCount = value;
                 Serial.println("Container count updated");
                 vTaskDelay(pdMS_TO_TICKS(5000));
             }
@@ -60,7 +68,9 @@ Data::Data() :
         xTaskCreate([] (void* arg) {
             Data* data = reinterpret_cast<Data*>(arg);
             while (true) {
-                data->testValue1 = getTestValue1();
+                int value = getTestValue1();
+                if (value < 0) continue;
+                data->testValue1 = value;
                 Serial.println("Test value 1 updated");
                 vTaskDelay(pdMS_TO_TICKS(5000));
             }
@@ -69,7 +79,9 @@ Data::Data() :
         xTaskCreate([] (void* arg) {
             Data* data = reinterpret_cast<Data*>(arg);
             while (true) {
-                data->testValue2 = getTestValue2();
+                int value = getTestValue2();
+                if (value < 0) continue;
+                data->testValue2 = value;
                 Serial.println("Test value 2 updated");
                 vTaskDelay(pdMS_TO_TICKS(5000));
             }
@@ -80,7 +92,9 @@ Data::Data() :
             while (true) {
                 {
                     std::lock_guard<std::mutex> lock(data->podDataMutex);
-                    data->podDataNormalised = data->getPodDateNormalised();
+                    auto value = getPodDateNormalised();
+                    if (value.empty()) continue;
+                    data->podDataNormalised = std::move(value);
                 }
                 Serial.println("Pod data updated");
                 vTaskDelay(pdMS_TO_TICKS(5000));
@@ -92,19 +106,39 @@ Data::Data() :
 }
 
 int Data::getCpuUsage() {
-    return static_cast<int>(100 * promQuery("cluster:node_cpu:ratio_rate5m").toFloat());
+    String str = promQuery("cluster:node_cpu:ratio_rate5m");
+    if (str.isEmpty()) {
+        Serial.println("Failed to get CPU usage from Prometheus");
+        return -1;
+    }
+    return static_cast<int>(100 * str.toFloat());
 }
 
 int Data::getMemUsage() {
-    return static_cast<int>(100 * promQuery("1 - sum(:node_memory_MemAvailable_bytes:sum) / sum(node_memory_MemTotal_bytes)").toFloat());
+    String str = promQuery("1 - sum(node_memory_MemAvailable_bytes) / sum(node_memory_MemTotal_bytes)");
+    if (str.isEmpty()) {
+        Serial.println("Failed to get Memory usage from Prometheus");
+        return -1;
+    }
+    return static_cast<int>(100 * str.toFloat());
 }
 
 int Data::getPodCount() {
-    return promQuery("sum(kubelet_running_pods{job='kubelet'})").toInt();
+    String str = promQuery("sum(kubelet_running_pods{job='kubelet'})");
+    if (str.isEmpty()) {
+        Serial.println("Failed to get Pod count from Prometheus");
+        return -1;
+    }
+    return str.toInt();
 }
 
 int Data::getContainerCount() {
-    return promQuery("sum(kubelet_running_containers{job='kubelet'})").toInt();
+    String str = promQuery("sum(kubelet_running_containers{job='kubelet'})");
+    if (str.isEmpty()) {
+        Serial.println("Failed to get Container count from Prometheus");
+        return -1;
+    }
+    return str.toInt();
 }
 
 int Data::getTestValue1() {
