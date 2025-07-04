@@ -10,8 +10,9 @@ Data::Data() :
     memUsage(0),
     podCount(0),
     containerCount(0),
-    testValue1(0),
-    testValue2(0)
+    nasUsage(0),
+    testValue(0),
+    isArrayOk(true)
 {
     xTaskCreate([] (void* arg) {
         Data* data = reinterpret_cast<Data*>(arg);
@@ -68,24 +69,24 @@ Data::Data() :
         xTaskCreate([] (void* arg) {
             Data* data = reinterpret_cast<Data*>(arg);
             while (true) {
-                int value = getTestValue1();
+                int value = data->getNasUsage();
                 if (value < 0) continue;
-                data->testValue1 = value;
-                Serial.println("Test value 1 updated");
-                vTaskDelay(pdMS_TO_TICKS(5000));
+                data->nasUsage = value;
+                Serial.println("Nas usage updated");
+                vTaskDelay(pdMS_TO_TICKS(60000));
             }
-        }, "data_test_value_1", TASK_STACK_SIZE, data, 1, nullptr);
+        }, "data_nas_usage", TASK_STACK_SIZE, data, 1, nullptr);
 
         xTaskCreate([] (void* arg) {
             Data* data = reinterpret_cast<Data*>(arg);
             while (true) {
-                int value = getTestValue2();
+                int value = getTestValue();
                 if (value < 0) continue;
-                data->testValue2 = value;
-                Serial.println("Test value 2 updated");
+                data->testValue = value;
+                Serial.println("Test value updated");
                 vTaskDelay(pdMS_TO_TICKS(5000));
             }
-        }, "data_test_value_2", TASK_STACK_SIZE, data, 1, nullptr);
+        }, "data_test_value", TASK_STACK_SIZE, data, 1, nullptr);
         
         xTaskCreate([] (void* arg) {
             Data* data = reinterpret_cast<Data*>(arg);
@@ -138,13 +139,29 @@ int Data::getContainerCount() {
     return str.toInt();
 }
 
-int Data::getTestValue1() {
-    vTaskDelay(pdMS_TO_TICKS(rand() % 100));
-    srand(millis());
-    return rand() % 100;
+int Data::getNasUsage() {
+    JsonDocument params;
+    params["devicefile"] = "/dev/md0";
+    JsonDocument doc = omvQuery("FileSystemMgmt", "enumerateMountedFilesystems", params);
+    
+    if (doc.isNull()) return -1;
+    
+    const char* deviceName = "md0";
+    const JsonObject* device = nullptr;
+
+    for (const JsonObject& dev : doc.as<JsonArray>()) {
+        if (dev["devicename"] == deviceName) {
+            device = &dev;
+            break;
+        }
+    }
+    
+    if (!device) return -1;
+    
+    return (*device)["percentage"] | 0;
 }
 
-int Data::getTestValue2() {
+int Data::getTestValue() {
     vTaskDelay(pdMS_TO_TICKS(rand() % 100));
     srand(millis());
     return rand() % 100;

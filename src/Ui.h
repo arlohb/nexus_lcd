@@ -20,10 +20,10 @@ private:
     lv_obj_t* cpuUsageLabel;
     lv_obj_t* memUsageBar;
     lv_obj_t* memUsageValue;
-    lv_obj_t* testBar1;
-    lv_obj_t* testBarValue1;
-    lv_obj_t* testBar2;
-    lv_obj_t* testBarValue2;
+    lv_obj_t* nasUsageBar;
+    lv_obj_t* nasUsageBarValue;
+    lv_obj_t* testBar;
+    lv_obj_t* testBarValue;
     lv_obj_t* podLabel;
     lv_obj_t* containerLabel;
 
