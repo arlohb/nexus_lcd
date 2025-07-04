@@ -90,16 +90,13 @@ Data::Data() :
         xTaskCreate([] (void* arg) {
             Data* data = reinterpret_cast<Data*>(arg);
             while (true) {
-                {
-                    std::lock_guard<std::mutex> lock(data->podDataMutex);
-                    auto value = getPodDateNormalised();
-                    if (value.empty()) continue;
-                    data->podDataNormalised = std::move(value);
-                }
-                Serial.println("Pod data updated");
+                int value = data->getIsArrayOk();
+                if (value < 0) continue;
+                data->isArrayOk = value == 1;
+                Serial.println("Is array ok updated");
                 vTaskDelay(pdMS_TO_TICKS(5000));
             }
-        }, "data_pod_data", TASK_STACK_SIZE, data, 1, nullptr);
+        }, "data_is_array_ok", TASK_STACK_SIZE, data, 1, nullptr);
         
         vTaskDelete(nullptr);
     }, "data_task_creator", 1024, this, 1, nullptr);
@@ -153,33 +150,19 @@ int Data::getTestValue2() {
     return rand() % 100;
 }
 
-std::vector<uint8_t> Data::getPodData() {
-    std::vector<uint8_t> data;
-    data.resize(48);
-
-    for (size_t i = 0; i < data.size(); i++) {
-        data[i] = static_cast<uint8_t>(rand() % 256);
-    }
-
-    return data;
-}
-
-std::vector<uint8_t> Data::getPodDateNormalised() {
-    std::vector<uint8_t> data = getPodData();
-
-    uint8_t min = 255;
-    uint8_t max = 0;
-
-    for (const uint8_t& value : data) {
-        if (value < min) min = value;
-        if (value > max) max = value;
-    }
+int Data::getIsArrayOk() {
+    JsonDocument params;
+    params["devicefile"] = "/dev/md0";
+    JsonDocument doc = omvQuery("MdMgmt", "get", params);
     
-    for (uint8_t& value : data) {
-        value = static_cast<uint8_t>((value - min) * 255 / (max - min));
+    if (doc.isNull()) {
+        return -1;
     }
-    
-    return data;
+
+    int deviceCount = doc["devices"].size() | 0;
+
+    // Array is ok if there are 5 or more devices
+    return deviceCount >= 5 ? 1 : 0;
 }
 
 String Data::promQuery(const String& query) {
@@ -210,4 +193,114 @@ String Data::promQuery(const String& query) {
     http.end();
     
     return data;
+}
+
+void Data::omvLogin() {
+    // Create our own WifiClient to ignore SSL certificates
+    WiFiClientSecure client;
+    client.setInsecure();
+
+    HTTPClient http;
+    
+    http.begin(client, secrets::omvEndpoint);
+    http.setCookieJar(&omvCookieJar);
+    http.addHeader("Content-Type", "application/json");
+    
+    JsonDocument doc;
+    doc["service"] = "session";
+    doc["method"] = "login";
+    doc["params"]["username"] = secrets::omvUsername;
+    doc["params"]["password"] = secrets::omvPassword;
+
+    int code = http.POST(doc.as<String>());
+    if (code != HTTP_CODE_OK) {
+        Serial.printf("OMV Auth : HTTP POST failed with code %d\n", code);
+        http.end();
+        return;
+    }
+    
+    deserializeJson(doc, http.getString());
+    
+    if (!doc["error"].isNull()) {
+        Serial.println("OMV Auth : " + doc["error"]["message"].as<String>());
+        http.end();
+        return;
+    }
+    
+    http.end();
+}
+
+JsonDocument Data::omvQuery(
+    const std::string& service,
+    const std::string& method,
+    const JsonDocument& params
+) {
+    // Check for auth
+    if (omvCookieJar.empty()) {
+        Serial.println("OMV Query : Cookie Jar is empty, logging in...");
+        omvLogin();
+        if (omvCookieJar.empty()) {
+            Serial.println("OMV Query : Failed to log in to OMV");
+            return JsonDocument();
+        }
+    }
+
+    // Create our own WifiClient to ignore SSL certificates
+    WiFiClientSecure client;
+    client.setInsecure();
+
+    HTTPClient http;
+    
+    http.begin(client, secrets::omvEndpoint);
+    http.addHeader("Content-Type", "application/json");
+    
+    JsonDocument doc;
+    doc["service"] = service;
+    doc["method"] = method;
+    doc["params"] = params;
+    
+    // Set cookies manually
+    // Didn't work through cookie jar, maybe because of the insecure client
+    std::string cookies;
+    for (const auto& cookie : omvCookieJar) {
+        cookies = cookies + cookie.name.c_str() + "=" + cookie.value.c_str() + "; ";
+    }
+    // Remove the last semicolon and space
+    if (!cookies.empty()) {
+        cookies.pop_back(); // Remove last space
+        cookies.pop_back(); // Remove last semicolon
+    }
+    http.addHeader("Cookie", cookies.c_str());
+
+    int code = http.POST(doc.as<String>());
+
+    deserializeJson(doc, http.getString());
+
+    if (code != HTTP_CODE_OK || !doc["error"].isNull()) {
+        // If we need to re-authenticate
+        if (code == HTTP_CODE_UNAUTHORIZED || code == HTTP_CODE_FORBIDDEN) {
+            Serial.println("OMV Query : Unauthorized, re-authenticating...");
+            omvCookieJar.clear();
+            omvLogin();
+            if (omvCookieJar.empty()) {
+                Serial.println("OMV Query : Failed to log in to OMV");
+                return JsonDocument();
+            }
+            // Retry the query
+            return omvQuery(service, method, params);
+        }
+
+        Serial.printf("OMV Query : HTTP POST failed with code %d\n", code);
+
+        // Print OMV error if available
+        if (!doc.isNull() && !doc["error"].isNull()) {
+            Serial.println("OMV Query : " + doc["error"]["message"].as<String>());
+        }
+
+        http.end();
+        return JsonDocument();
+    }
+
+    http.end();
+    return doc["response"];
 }

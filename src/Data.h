@@ -5,6 +5,8 @@
 #include <sys/types.h>
 #include <atomic>
 #include <mutex>
+#include <ArduinoJson.h>
+#include <HTTPClient.h>
 
 class Data {
 public:
@@ -21,12 +23,19 @@ public:
     std::atomic<uint16_t> containerCount;
     std::atomic<uint8_t> testValue1;
     std::atomic<uint8_t> testValue2;
-
-    std::mutex podDataMutex;
-    std::vector<uint8_t> podDataNormalised;
+    
+    std::atomic<bool> isArrayOk;
 
 private:
     static String promQuery(const String& query);
+    
+    CookieJar omvCookieJar;
+    void omvLogin();
+    JsonDocument omvQuery(
+        const std::string& service,
+        const std::string& method,
+        const JsonDocument& params = JsonDocument()
+    );
 
     static int getCpuUsage();
     static int getMemUsage();
@@ -35,7 +44,7 @@ private:
     
     static int getTestValue1();
     static int getTestValue2();
-
-    static std::vector<uint8_t> getPodData();
-    static std::vector<uint8_t> getPodDateNormalised();
+    
+    /// Returns 1 if true, 0 if false, -1 if error
+    int getIsArrayOk();
 };
