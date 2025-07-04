@@ -25,7 +25,7 @@ Data::Data() :
         xTaskCreate([] (void* arg) {
             Data* data = reinterpret_cast<Data*>(arg);
             while (true) {
-                int value = getCpuUsage();
+                int value = data->getCpuUsage();
                 if (value < 0) continue;
                 data->cpuUsage = value;
                 Serial.println("Cpu usage updated");
@@ -36,7 +36,7 @@ Data::Data() :
         xTaskCreate([] (void* arg) {
             Data* data = reinterpret_cast<Data*>(arg);
             while (true) {
-                int value = getMemUsage();
+                int value = data->getMemUsage();
                 if (value < 0) continue;
                 data->memUsage = value;
                 Serial.println("Memory usage updated");
@@ -47,7 +47,7 @@ Data::Data() :
         xTaskCreate([] (void* arg) {
             Data* data = reinterpret_cast<Data*>(arg);
             while (true) {
-                int value = getPodCount();
+                int value = data->getPodCount();
                 if (value < 0) continue;
                 data->podCount = value;
                 Serial.println("Pod count updated");
@@ -58,7 +58,7 @@ Data::Data() :
         xTaskCreate([] (void* arg) {
             Data* data = reinterpret_cast<Data*>(arg);
             while (true) {
-                int value = getContainerCount();
+                int value = data->getContainerCount();
                 if (value < 0) continue;
                 data->containerCount = value;
                 Serial.println("Container count updated");
@@ -80,7 +80,7 @@ Data::Data() :
         xTaskCreate([] (void* arg) {
             Data* data = reinterpret_cast<Data*>(arg);
             while (true) {
-                int value = getTestValue();
+                int value = data->getTestValue();
                 if (value < 0) continue;
                 data->testValue = value;
                 Serial.println("Test value updated");

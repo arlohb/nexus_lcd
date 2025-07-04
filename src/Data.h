@@ -27,7 +27,7 @@ public:
     std::atomic<bool> isArrayOk;
 
 private:
-    static String promQuery(const String& query);
+    String promQuery(const String& query);
     
     CookieJar omvCookieJar;
     void omvLogin();
@@ -37,13 +37,13 @@ private:
         const JsonDocument& params = JsonDocument()
     );
 
-    static int getCpuUsage();
-    static int getMemUsage();
-    static int getPodCount();
-    static int getContainerCount();
+    int getCpuUsage();
+    int getMemUsage();
+    int getPodCount();
+    int getContainerCount();
     int getNasUsage();
     
-    static int getTestValue();
+    int getTestValue();
     
     /// Returns 1 if true, 0 if false, -1 if error
     int getIsArrayOk();
