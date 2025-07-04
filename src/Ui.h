@@ -16,7 +16,7 @@ private:
     // Isn't the full size of the screen as it is drawn partially
     lv_color_t colourBuffer[512];
 
-    lv_obj_t* cpuUsageArc;
+    lv_obj_t* nodeCpuUsageArcs[Data::NODE_COUNT];
     lv_obj_t* cpuUsageLabel;
     lv_obj_t* memUsageBar;
     lv_obj_t* memUsageValue;

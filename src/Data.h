@@ -8,9 +8,16 @@
 #include <ArduinoJson.h>
 #include <HTTPClient.h>
 
+struct Node {
+    std::string name;
+    std::string ip;
+};
+
 class Data {
 public:
-    static const uint TASK_STACK_SIZE = 16 * 1024;
+    static const uint TASK_STACK_SIZE = 8 * 1024;
+    static const size_t NODE_COUNT = 4;
+    static const std::array<Node, NODE_COUNT> NODES;
 
     Data();
     
@@ -18,6 +25,7 @@ public:
     Data& operator=(const Data&) = delete;
     
     std::atomic<uint8_t> cpuUsage;
+    std::array<std::atomic<uint8_t>, NODE_COUNT> nodeCpuUsage;
     std::atomic<uint8_t> memUsage;
     std::atomic<uint16_t> podCount;
     std::atomic<uint16_t> containerCount;
@@ -38,6 +46,7 @@ private:
     );
 
     int getCpuUsage();
+    int getCpuUsage(const std::string& node);
     int getMemUsage();
     int getPodCount();
     int getContainerCount();

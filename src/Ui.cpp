@@ -19,12 +19,37 @@ Ui::Ui() {
 
     lv_obj_t* root = lv_scr_act();
     
-    cpuUsageArc = lv_arc_create(root);
-    lv_obj_set_size(cpuUsageArc, TFT_WIDTH - 20, TFT_HEIGHT - 20);
-    lv_arc_set_rotation(cpuUsageArc, 135);
-    lv_arc_set_bg_angles(cpuUsageArc, 0, 270);
-    lv_arc_set_value(cpuUsageArc, 0);
-    lv_obj_center(cpuUsageArc);
+    {
+        const float totalAngle = 270;
+        const float spacing = 24;
+        const float totalSpacing = spacing * Data::NODE_COUNT;
+        const float arcAngle = (totalAngle - totalSpacing) / Data::NODE_COUNT;
+        
+        for (size_t i = 0; i < Data::NODE_COUNT; i++) {
+            float angle = 135 + spacing + i * (arcAngle + spacing);
+
+            lv_obj_t* arc = lv_arc_create(root);
+            lv_obj_set_size(arc, TFT_WIDTH - 20, TFT_HEIGHT - 20);
+            lv_arc_set_rotation(arc, angle);
+            lv_arc_set_bg_angles(arc, 0, arcAngle);
+            lv_arc_set_value(arc, 0);
+            lv_obj_center(arc);
+            
+            nodeCpuUsageArcs[i] = arc;
+            
+            lv_obj_t* label = lv_label_create(arc);
+            lv_label_set_text_fmt(label, "%c", toupper(Data::NODES[i].name[0]));
+            lv_obj_set_style_text_color(label, lv_color_white(), LV_PART_MAIN);
+            lv_obj_set_style_text_align(label, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
+
+            const float labelRadius = (TFT_WIDTH / 2 - 16);
+            const float labelAngle = angle - (spacing / 2.0f);
+            const float labelAngleRad = labelAngle * (M_PI / 180.0f);
+            const int x = (TFT_WIDTH / 2) + labelRadius * cos(labelAngleRad);
+            const int y = (TFT_HEIGHT / 2) + labelRadius * sin(labelAngleRad);
+            lv_obj_set_pos(label, x - 16, y - 24);
+        }
+    }
     
     memUsageBar = lv_bar_create(root);
     lv_obj_align(memUsageBar, LV_ALIGN_CENTER, 0, 0);
@@ -117,11 +142,17 @@ void Ui::start(const Data* data) {
 }
 
 void Ui::loop(const Data& data) {
-    if (lv_arc_get_value(cpuUsageArc) != data.cpuUsage) {
-        lv_arc_set_value(cpuUsageArc, data.cpuUsage);
-        lv_obj_set_style_arc_color(cpuUsageArc, utils::color_temp(lv_arc_get_value(cpuUsageArc)), LV_PART_INDICATOR);
-        lv_obj_set_style_bg_color(cpuUsageArc, utils::color_temp(lv_arc_get_value(cpuUsageArc)), LV_PART_KNOB);
-        lv_label_set_text_fmt(cpuUsageLabel, "CPU %d%%", lv_arc_get_value(cpuUsageArc));
+    lv_label_set_text_fmt(cpuUsageLabel, "CPU %d%%", data.cpuUsage.load());
+    
+    for (size_t i = 0; i < Data::NODE_COUNT; ++i) {
+        int nodeCpuUsage = data.nodeCpuUsage[i];
+        if (nodeCpuUsage < 0) continue;
+        
+        if (lv_arc_get_value(nodeCpuUsageArcs[i]) != nodeCpuUsage) {
+            lv_arc_set_value(nodeCpuUsageArcs[i], nodeCpuUsage);
+            lv_obj_set_style_arc_color(nodeCpuUsageArcs[i], utils::color_temp(lv_arc_get_value(nodeCpuUsageArcs[i])), LV_PART_INDICATOR);
+            lv_obj_set_style_bg_color(nodeCpuUsageArcs[i], utils::color_temp(lv_arc_get_value(nodeCpuUsageArcs[i])), LV_PART_KNOB);
+        }
     }
 
     if (lv_bar_get_value(memUsageBar) != data.memUsage) {

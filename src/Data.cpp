@@ -5,6 +5,13 @@
 #include <HTTPClient.h>
 #include "Secrets.h"
 
+const std::array<Node, Data::NODE_COUNT> Data::NODES = {
+    Node {"datasphere", "10.0.0.164"},
+    Node {"arlo-laptop1", "10.0.0.162"},
+    Node {"neptune", "10.0.0.124"},
+    Node {"pluto", "10.0.0.208"},
+};
+
 Data::Data() :
     cpuUsage(0),
     memUsage(0),
@@ -32,6 +39,31 @@ Data::Data() :
                 vTaskDelay(pdMS_TO_TICKS(5000));
             }
         }, "data_cpu_usage", TASK_STACK_SIZE, data, 1, nullptr);
+        
+        {
+            struct Args {
+                Data* data;
+                size_t index;
+            };
+
+            for (size_t i = 0; i < Data::NODE_COUNT; ++i) {
+                Args* args = new Args { data, i };
+
+                xTaskCreate([] (void* arg) {
+                    Args* args = reinterpret_cast<Args*>(arg);
+                    Data* data = args->data;
+                    size_t index = args->index;
+
+                    while (true) {
+                        int value = data->getCpuUsage(data->NODES[index].ip);
+                        if (value < 0) continue;
+                        data->nodeCpuUsage[index] = value;
+                        Serial.printf("Node %s cpu usage updated\n", data->NODES[index].name.c_str());
+                        vTaskDelay(pdMS_TO_TICKS(5000));
+                    }
+                }, ("data_cpu_usage_" + String(i)).c_str(), TASK_STACK_SIZE, args, 1, nullptr);
+            }
+        }
         
         xTaskCreate([] (void* arg) {
             Data* data = reinterpret_cast<Data*>(arg);
@@ -107,6 +139,16 @@ int Data::getCpuUsage() {
     String str = promQuery("cluster:node_cpu:ratio_rate5m");
     if (str.isEmpty()) {
         Serial.println("Failed to get CPU usage from Prometheus");
+        return -1;
+    }
+    return static_cast<int>(100 * str.toFloat());
+}
+
+int Data::getCpuUsage(const std::string& node) {
+    String query = "instance:node_cpu_utilisation:rate5m{instance=\"" + String(node.c_str()) + ":9100\"}";
+    String str = promQuery(query);
+    if (str.isEmpty()) {
+        Serial.println("Failed to get CPU usage for node " + String(node.c_str()) + " from Prometheus");
         return -1;
     }
     return static_cast<int>(100 * str.toFloat());
