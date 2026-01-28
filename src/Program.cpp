@@ -18,41 +18,42 @@ void Program::start() {
 
 void Program::startWifi() {
     xTaskCreate([] (void* arg) {
-        Serial.printf("Connecting to WiFi '%s'...\n", secrets::ssid);
+        ESP_LOGI("Program::startWifi", "Connecting to WiFi '%s'...", secrets::ssid);
         WiFi.setMinSecurity(WIFI_AUTH_OPEN);
         WiFi.begin(secrets::ssid, secrets::password);
         
         wl_status_t lastStatus = static_cast<wl_status_t>(-1);
         while (WiFi.status() != WL_CONNECTED) {
             if (WiFi.status() != lastStatus) {
-                Serial.printf("Status changed: ");
+                char* str = nullptr;
                 switch (WiFi.status()) {
                     case WL_IDLE_STATUS:
-                        Serial.println("WL_IDLE_STATUS");
+                        str = "WL_IDLE_STATUS";
                         break;
                     case WL_NO_SSID_AVAIL:
-                        Serial.println("WL_NO_SSID_AVAIL");
+                        str = "WL_NO_SSID_AVAIL";
                         break;
                     case WL_CONNECT_FAILED:
-                        Serial.println("WL_CONNECT_FAILED");
+                        str = "WL_CONNECT_FAILED";
                         break;
                     case WL_CONNECTION_LOST:
-                        Serial.println("WL_CONNECTION_LOST");
+                        str = "WL_CONNECTION_LOST";
                         break;
                     case WL_DISCONNECTED:
-                        Serial.println("WL_DISCONNECTED");
+                        str = "WL_DISCONNECTED";
                         break;
                     case WL_CONNECTED:
-                        Serial.println("WL_CONNECTED");
+                        str = "WL_CONNECTED";
                         break;
                     default:
-                        Serial.println("Unknown status");
+                        str = "Unknown status";
                 }
+                ESP_LOGI("Program::startWifi", "Status changed: %s", str);
                 lastStatus = WiFi.status();
             }
             delay(100);
         }
-        Serial.println("Connected to WiFi!");
+        ESP_LOGI("Program::startWifi", "Connected to WiFi!");
 
         // Use randomness of WiFi connection time as a seed
         srand(static_cast<unsigned int>(millis()));

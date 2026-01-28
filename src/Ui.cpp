@@ -3,19 +3,19 @@
 #include "Utils.h"
 
 Ui::Ui() {
-    Serial.println("Setting up lvgl...");
+    ESP_LOGI("Ui::Ui", "Setting up lvgl...");
 
     lv_init();
     
     lv_log_register_print_cb([] (lv_log_level_t level, const char* msg) {
-        Serial.print(msg);
+        ESP_LOGI("LVGL", "%s", msg);
     });
 
     lv_tick_set_cb([] () { return (unsigned int) millis(); });
 
     lv_tft_espi_create(TFT_WIDTH, TFT_HEIGHT, colourBuffer, sizeof(colourBuffer));
     
-    Serial.println("Creating UI elements...");
+    ESP_LOGI("Ui::Ui", "Creating UI elements...");
 
     lv_obj_t* root = lv_scr_act();
     

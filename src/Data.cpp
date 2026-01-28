@@ -35,7 +35,7 @@ Data::Data() :
                 int value = data->getCpuUsage();
                 if (value < 0) continue;
                 data->cpuUsage = value;
-                Serial.println("Cpu usage updated");
+                ESP_LOGI("Data::data_cpu_usage", "Cpu usage updated");
                 vTaskDelay(pdMS_TO_TICKS(5000));
             }
         }, "data_cpu_usage", TASK_STACK_SIZE, data, 1, nullptr);
@@ -58,7 +58,7 @@ Data::Data() :
                         int value = data->getCpuUsage(data->NODES[index].ip);
                         if (value < 0) continue;
                         data->nodeCpuUsage[index] = value;
-                        Serial.printf("Node %s cpu usage updated\n", data->NODES[index].name.c_str());
+                        ESP_LOGI("Data::data_cpu_usage_xxx", "Node %s cpu usage updated\n", data->NODES[index].name.c_str());
                         vTaskDelay(pdMS_TO_TICKS(5000));
                     }
                 }, ("data_cpu_usage_" + String(i)).c_str(), TASK_STACK_SIZE, args, 1, nullptr);
@@ -71,7 +71,7 @@ Data::Data() :
                 int value = data->getMemUsage();
                 if (value < 0) continue;
                 data->memUsage = value;
-                Serial.println("Memory usage updated");
+                ESP_LOGI("Data::data_mem_usage", "Memory usage updated");
                 vTaskDelay(pdMS_TO_TICKS(5000));
             }
         }, "data_mem_usage", TASK_STACK_SIZE, data, 1, nullptr);
@@ -82,7 +82,7 @@ Data::Data() :
                 int value = data->getPodCount();
                 if (value < 0) continue;
                 data->podCount = value;
-                Serial.println("Pod count updated");
+                ESP_LOGI("Data::data_pod_count", "Pod count updated");
                 vTaskDelay(pdMS_TO_TICKS(5000));
             }
         }, "data_pod_count", TASK_STACK_SIZE, data, 1, nullptr);
@@ -93,7 +93,7 @@ Data::Data() :
                 int value = data->getContainerCount();
                 if (value < 0) continue;
                 data->containerCount = value;
-                Serial.println("Container count updated");
+                ESP_LOGI("Data::data_container_count", "Container count updated");
                 vTaskDelay(pdMS_TO_TICKS(5000));
             }
         }, "data_container_count", TASK_STACK_SIZE, data, 1, nullptr);
@@ -104,7 +104,7 @@ Data::Data() :
                 int value = data->getNasUsage();
                 if (value < 0) continue;
                 data->nasUsage = value;
-                Serial.println("Nas usage updated");
+                ESP_LOGI("Data::data_nas_usage", "Nas usage updated");
                 vTaskDelay(pdMS_TO_TICKS(60000));
             }
         }, "data_nas_usage", TASK_STACK_SIZE, data, 1, nullptr);
@@ -115,7 +115,7 @@ Data::Data() :
                 int value = data->getTestValue();
                 if (value < 0) continue;
                 data->testValue = value;
-                Serial.println("Test value updated");
+                ESP_LOGI("Data::data_test_value", "Test value updated");
                 vTaskDelay(pdMS_TO_TICKS(5000));
             }
         }, "data_test_value", TASK_STACK_SIZE, data, 1, nullptr);
@@ -126,7 +126,7 @@ Data::Data() :
                 int value = data->getIsArrayOk();
                 if (value < 0) continue;
                 data->isArrayOk = value == 1;
-                Serial.println("Is array ok updated");
+                ESP_LOGI("Data::data_is_array_ok", "Is array ok updated");
                 vTaskDelay(pdMS_TO_TICKS(5000));
             }
         }, "data_is_array_ok", TASK_STACK_SIZE, data, 1, nullptr);
@@ -138,7 +138,7 @@ Data::Data() :
 int Data::getCpuUsage() {
     String str = promQuery("cluster:node_cpu:ratio_rate5m");
     if (str.isEmpty()) {
-        Serial.println("Failed to get CPU usage from Prometheus");
+        ESP_LOGI("Data::getCpuUsage", "Failed to get CPU usage from Prometheus");
         return -1;
     }
     return static_cast<int>(100 * str.toFloat());
@@ -148,7 +148,7 @@ int Data::getCpuUsage(const std::string& node) {
     String query = "instance:node_cpu_utilisation:rate5m{instance=\"" + String(node.c_str()) + ":9100\"}";
     String str = promQuery(query);
     if (str.isEmpty()) {
-        Serial.println("Failed to get CPU usage for node " + String(node.c_str()) + " from Prometheus");
+        ESP_LOGI("Data::getCpuUsage", "Failed to get CPU usage for node %s from Prometheus", node.c_str());
         return -1;
     }
     return static_cast<int>(100 * str.toFloat());
@@ -157,7 +157,7 @@ int Data::getCpuUsage(const std::string& node) {
 int Data::getMemUsage() {
     String str = promQuery("1 - sum(node_memory_MemAvailable_bytes) / sum(node_memory_MemTotal_bytes)");
     if (str.isEmpty()) {
-        Serial.println("Failed to get Memory usage from Prometheus");
+        ESP_LOGI("Data::getMemUsage", "Failed to get Memory usage from Prometheus");
         return -1;
     }
     return static_cast<int>(100 * str.toFloat());
@@ -166,7 +166,7 @@ int Data::getMemUsage() {
 int Data::getPodCount() {
     String str = promQuery("sum(kubelet_running_pods{job='kubelet'})");
     if (str.isEmpty()) {
-        Serial.println("Failed to get Pod count from Prometheus");
+        ESP_LOGI("Data::getPodCount", "Failed to get Pod count from Prometheus");
         return -1;
     }
     return str.toInt();
@@ -175,7 +175,7 @@ int Data::getPodCount() {
 int Data::getContainerCount() {
     String str = promQuery("sum(kubelet_running_containers{job='kubelet'})");
     if (str.isEmpty()) {
-        Serial.println("Failed to get Container count from Prometheus");
+        ESP_LOGI("Data::getContainerCount", "Failed to get Container count from Prometheus");
         return -1;
     }
     return str.toInt();
@@ -234,7 +234,7 @@ String Data::promQuery(const String& query) {
     
     int code = http.GET();
     if (code != HTTP_CODE_OK) {
-        Serial.printf("HTTP GET failed with code %d\n", code);
+        ESP_LOGI("Data::promQuery", "HTTP GET failed with code %d", code);
         http.end();
         return "";
     }
@@ -242,7 +242,7 @@ String Data::promQuery(const String& query) {
     JsonDocument doc;
     deserializeJson(doc, http.getString());
     if (doc["status"] != "success") {
-        Serial.println("Prom query not success: " + doc["error"].as<String>());
+        ESP_LOGI("Data::promQuery", "Prom query not success: %s", doc["error"].as<String>().c_str());
         http.end();
         return "";
     }
@@ -273,7 +273,7 @@ void Data::omvLogin() {
 
     int code = http.POST(doc.as<String>());
     if (code != HTTP_CODE_OK) {
-        Serial.printf("OMV Auth : HTTP POST failed with code %d\n", code);
+        ESP_LOGI("Data::omvLogin", "HTTP POST failed with code %d", code);
         http.end();
         return;
     }
@@ -281,7 +281,7 @@ void Data::omvLogin() {
     deserializeJson(doc, http.getString());
     
     if (!doc["error"].isNull()) {
-        Serial.println("OMV Auth : " + doc["error"]["message"].as<String>());
+        ESP_LOGI("Data::omvLogin", "%s", doc["error"]["message"].as<String>().c_str());
         http.end();
         return;
     }
@@ -296,10 +296,10 @@ JsonDocument Data::omvQuery(
 ) {
     // Check for auth
     if (omvCookieJar.empty()) {
-        Serial.println("OMV Query : Cookie Jar is empty, logging in...");
+        ESP_LOGI("Data::omvQuery", "Cookie Jar is empty, logging in...");
         omvLogin();
         if (omvCookieJar.empty()) {
-            Serial.println("OMV Query : Failed to log in to OMV");
+            ESP_LOGI("Data::omvQuery", "Failed to log in to OMV");
             return JsonDocument();
         }
     }
@@ -338,22 +338,22 @@ JsonDocument Data::omvQuery(
     if (code != HTTP_CODE_OK || !doc["error"].isNull()) {
         // If we need to re-authenticate
         if (code == HTTP_CODE_UNAUTHORIZED || code == HTTP_CODE_FORBIDDEN) {
-            Serial.println("OMV Query : Unauthorized, re-authenticating...");
+            ESP_LOGI("OMV Query", "Unauthorized, re-authenticating...");
             omvCookieJar.clear();
             omvLogin();
             if (omvCookieJar.empty()) {
-                Serial.println("OMV Query : Failed to log in to OMV");
+                ESP_LOGI("OMV Query", "Failed to log in to OMV");
                 return JsonDocument();
             }
             // Retry the query
             return omvQuery(service, method, params);
         }
 
-        Serial.printf("OMV Query : HTTP POST failed with code %d\n", code);
+        ESP_LOGI("OMV Query", "HTTP POST failed with code %d", code);
 
         // Print OMV error if available
         if (!doc.isNull() && !doc["error"].isNull()) {
-            Serial.println("OMV Query : " + doc["error"]["message"].as<String>());
+            ESP_LOGI("OMV Query", "%s", doc["error"]["message"].as<String>().c_str());
         }
 
         http.end();

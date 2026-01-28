@@ -5,7 +5,7 @@
 extern "C" void app_main() {
     initArduino();
     Serial.begin(115200);
-    Serial.println("Starting program...");
+    ESP_LOGI("main", "Starting program...");
 
     Program* program = new Program();
     program->start();
