@@ -234,7 +234,7 @@ String Data::promQuery(const String& query) {
     
     int code = http.GET();
     if (code != HTTP_CODE_OK) {
-        ESP_LOGI("Data::promQuery", "HTTP GET failed with code %d", code);
+        ESP_LOGI("Data::promQuery", "HTTP GET failed with code %d %s", code, http.errorToString(code).c_str());
         http.end();
         return "";
     }
@@ -273,7 +273,7 @@ void Data::omvLogin() {
 
     int code = http.POST(doc.as<String>());
     if (code != HTTP_CODE_OK) {
-        ESP_LOGI("Data::omvLogin", "HTTP POST failed with code %d", code);
+        ESP_LOGI("Data::omvLogin", "HTTP POST failed with code %d %s", code, http.errorToString(code).c_str());
         http.end();
         return;
     }
@@ -349,7 +349,7 @@ JsonDocument Data::omvQuery(
             return omvQuery(service, method, params);
         }
 
-        ESP_LOGI("OMV Query", "HTTP POST failed with code %d", code);
+        ESP_LOGI("OMV Query", "HTTP POST failed with code %d %s", code, http.errorToString(code).c_str());
 
         // Print OMV error if available
         if (!doc.isNull() && !doc["error"].isNull()) {
