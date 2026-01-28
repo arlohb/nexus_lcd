@@ -8,7 +8,18 @@ Ui::Ui() {
     lv_init();
     
     lv_log_register_print_cb([] (lv_log_level_t level, const char* msg) {
-        ESP_LOGI("LVGL", "%s", msg);
+        // Remove the ending '\n'
+
+        int len = strlen(msg);
+
+        // Allocate a new string
+        char* msg2 = (char*) malloc(sizeof(char) * len);
+        // Copy old into new, not including '\n'
+        memcpy(msg2, msg, len - 1);
+        // Set null termination
+        msg2[len - 1] = 0;
+
+        ESP_LOGI("LVGL", "%s", msg2);
     });
 
     lv_tick_set_cb([] () { return (unsigned int) millis(); });
