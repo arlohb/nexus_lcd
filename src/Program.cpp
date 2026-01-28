@@ -25,7 +25,7 @@ void Program::startWifi() {
         wl_status_t lastStatus = static_cast<wl_status_t>(-1);
         while (WiFi.status() != WL_CONNECTED) {
             if (WiFi.status() != lastStatus) {
-                char* str = nullptr;
+                const char* str = nullptr;
                 switch (WiFi.status()) {
                     case WL_IDLE_STATUS:
                         str = "WL_IDLE_STATUS";
