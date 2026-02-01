@@ -120,7 +120,7 @@ Data::Data() :
                     data->time = std::move(data->getTime());
                 }
                 ESP_LOGI("Data::data_time", "Time updated");
-                vTaskDelay(pdMS_TO_TICKS(60000));
+                vTaskDelay(pdMS_TO_TICKS(5000));
             }
         }, "data_time", TASK_STACK_SIZE, data, 1, nullptr);
 
