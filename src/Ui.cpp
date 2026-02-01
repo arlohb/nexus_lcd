@@ -13,13 +13,15 @@ Ui::Ui() {
         int len = strlen(msg);
 
         // Allocate a new string
-        char* msg2 = (char*) malloc(sizeof(char) * len);
+        char* msg2 = new char[len];
         // Copy old into new, not including '\n'
         memcpy(msg2, msg, len - 1);
         // Set null termination
         msg2[len - 1] = 0;
 
         ESP_LOGI("LVGL", "%s", msg2);
+        
+        delete[] msg2;
     });
 
     lv_tick_set_cb([] () { return (unsigned int) millis(); });
