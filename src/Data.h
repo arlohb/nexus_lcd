@@ -9,13 +9,13 @@
 #include <HTTPClient.h>
 
 struct Node {
-    std::string name;
-    std::string ip;
+    const char* name;
+    const char* ip;
 };
 
 class Data {
 public:
-    static const uint TASK_STACK_SIZE = 8 * 1024;
+    static const uint TASK_STACK_SIZE = 7 * 1024;
     static const size_t NODE_COUNT = 4;
     static const std::array<Node, NODE_COUNT> NODES;
 

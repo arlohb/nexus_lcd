@@ -26,7 +26,7 @@ void Leds::start(Data* data) {
             args->leds->loop(*args->data);
             vTaskDelay(pdMS_TO_TICKS(100));
         }
-    }, "leds_loop", 2048, args, 1, nullptr);
+    }, "leds_loop", 1024, args, 1, nullptr);
 }
 
 void Leds::loop(Data& data) {

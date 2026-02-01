@@ -58,7 +58,7 @@ Data::Data() :
                         int value = data->getCpuUsage(data->NODES[index].ip);
                         if (value < 0) continue;
                         data->nodeCpuUsage[index] = value;
-                        ESP_LOGI("Data::data_cpu_usage_xxx", "Node %s cpu usage updated\n", data->NODES[index].name.c_str());
+                        ESP_LOGI("Data::data_cpu_usage_xxx", "Node %s cpu usage updated\n", data->NODES[index].name);
                         vTaskDelay(pdMS_TO_TICKS(5000));
                     }
                 }, ("data_cpu_usage_" + String(i)).c_str(), TASK_STACK_SIZE, args, 1, nullptr);
