@@ -33,6 +33,7 @@ public:
     std::atomic<uint8_t> testValue;
     
     std::atomic<bool> isArrayOk;
+    std::atomic<bool> isArrayRebuilding;
 
 private:
     String promQuery(const String& query);
@@ -54,6 +55,7 @@ private:
     
     int getTestValue();
     
+    /// Returns [isArrayOk, isArrayRebuilding]
     /// Returns 1 if true, 0 if false, -1 if error
-    int getIsArrayOk();
+    std::pair<int, int> getIsArrayOk();
 };

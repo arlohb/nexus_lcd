@@ -19,7 +19,8 @@ Data::Data() :
     containerCount(0),
     nasUsage(0),
     testValue(0),
-    isArrayOk(true)
+    isArrayOk(true),
+    isArrayRebuilding(true)
 {
     xTaskCreate([] (void* arg) {
         Data* data = reinterpret_cast<Data*>(arg);
@@ -123,10 +124,15 @@ Data::Data() :
         xTaskCreate([] (void* arg) {
             Data* data = reinterpret_cast<Data*>(arg);
             while (true) {
-                int value = data->getIsArrayOk();
-                if (value < 0) continue;
-                data->isArrayOk = value == 1;
-                ESP_LOGI("Data::data_is_array_ok", "Is array ok updated");
+                auto [isOk, isRebuilding] = data->getIsArrayOk();
+                if (isOk >= 0) {
+                    data->isArrayOk = isOk == 1;
+                    ESP_LOGI("Data::data_is_array_ok", "Is array ok updated");
+                }
+                if (isRebuilding >= 0) {
+                    data->isArrayRebuilding = isRebuilding == 1;
+                    ESP_LOGI("Data::data_is_array_ok", "Is array rebuilding updated");
+                }
                 vTaskDelay(pdMS_TO_TICKS(5000));
             }
         }, "data_is_array_ok", TASK_STACK_SIZE, data, 1, nullptr);
@@ -209,19 +215,24 @@ int Data::getTestValue() {
     return rand() % 100;
 }
 
-int Data::getIsArrayOk() {
+std::pair<int, int> Data::getIsArrayOk() {
     JsonDocument params;
     params["devicefile"] = "/dev/md0";
     JsonDocument doc = omvQuery("MdMgmt", "get", params);
     
     if (doc.isNull()) {
-        return -1;
+        return std::make_pair(-1, -1);
     }
 
     int deviceCount = doc["devices"].size() | 0;
 
     // Array is ok if there are 5 or more devices
-    return deviceCount >= 5 ? 1 : 0;
+    int isOk = deviceCount >= 5 ? 1 : 0;
+    
+    std::string state = doc["state"].as<std::string>();
+    int isRebuilding = state.find("recovering") != std::string::npos ? 1 : 0;
+
+    return std::make_pair(isOk, isRebuilding);
 }
 
 String Data::promQuery(const String& query) {

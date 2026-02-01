@@ -30,15 +30,17 @@ void Leds::start(Data* data) {
 }
 
 void Leds::loop(Data& data) {
-    if (data.isArrayOk) {
-        np.clear();
-    } else {
+    if (!data.isArrayOk) {
         // Flash between red and white
         if (millis() % 1000 < 500) {
             np.fill(np.Color(255, 0, 0));
         } else {
             np.fill(np.Color(255, 255, 255));
         }
+    } else if (data.isArrayRebuilding) {
+        np.fill(np.Color(0, 0, 255));
+    } else {
+        np.clear();
     }
 
     np.show();
