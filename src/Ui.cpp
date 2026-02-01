@@ -74,15 +74,15 @@ Ui::Ui() {
     lv_obj_set_size(nasUsageBar, lv_pct(60), 24);
     lv_bar_set_value(nasUsageBar, 0, LV_ANIM_OFF);
     
-    testBar = lv_bar_create(root);
-    lv_obj_align(testBar, LV_ALIGN_CENTER, 0, -36);
-    lv_obj_set_size(testBar, lv_pct(60), 24);
-    lv_bar_set_value(testBar, 0, LV_ANIM_OFF);
+    cpuUsageBar = lv_bar_create(root);
+    lv_obj_align(cpuUsageBar, LV_ALIGN_CENTER, 0, -36);
+    lv_obj_set_size(cpuUsageBar, lv_pct(60), 24);
+    lv_bar_set_value(cpuUsageBar, 0, LV_ANIM_OFF);
     
-    cpuUsageLabel = lv_label_create(root);
-    lv_label_set_text(cpuUsageLabel, "CPU 0%");
-    lv_obj_align(cpuUsageLabel, LV_ALIGN_TOP_MID, 0, 40);
-    lv_obj_set_style_text_color(cpuUsageLabel, lv_color_white(), LV_PART_MAIN);
+    timeLabel = lv_label_create(root);
+    lv_label_set_text(timeLabel, "CPU 0%");
+    lv_obj_align(timeLabel, LV_ALIGN_TOP_MID, 0, 40);
+    lv_obj_set_style_text_color(timeLabel, lv_color_white(), LV_PART_MAIN);
     
     lv_obj_t* memUsageLabel = lv_label_create(memUsageBar);
     lv_label_set_text(memUsageLabel, "Mem");
@@ -104,15 +104,15 @@ Ui::Ui() {
     lv_obj_align(nasUsageBarValue, LV_ALIGN_RIGHT_MID, -8, 0);
     lv_obj_set_style_text_color(nasUsageBarValue, lv_color_white(), LV_PART_MAIN);
 
-    lv_obj_t* testBarLabel2 = lv_label_create(testBar);
-    lv_label_set_text(testBarLabel2, "Test");
-    lv_obj_align(testBarLabel2, LV_ALIGN_LEFT_MID, 8, 0);
-    lv_obj_set_style_text_color(testBarLabel2, lv_color_white(), LV_PART_MAIN);
+    lv_obj_t* cpuUsageBarLabel2 = lv_label_create(cpuUsageBar);
+    lv_label_set_text(cpuUsageBarLabel2, "CPU");
+    lv_obj_align(cpuUsageBarLabel2, LV_ALIGN_LEFT_MID, 8, 0);
+    lv_obj_set_style_text_color(cpuUsageBarLabel2, lv_color_white(), LV_PART_MAIN);
     
-    testBarValue = lv_label_create(testBar);
-    lv_label_set_text(testBarValue, "0%");
-    lv_obj_align(testBarValue, LV_ALIGN_RIGHT_MID, -8, 0);
-    lv_obj_set_style_text_color(testBarValue, lv_color_white(), LV_PART_MAIN);
+    cpuUsageBarValue = lv_label_create(cpuUsageBar);
+    lv_label_set_text(cpuUsageBarValue, "0%");
+    lv_obj_align(cpuUsageBarValue, LV_ALIGN_RIGHT_MID, -8, 0);
+    lv_obj_set_style_text_color(cpuUsageBarValue, lv_color_white(), LV_PART_MAIN);
     
     const int labelHorSpacing = 30;
     const int labelVerSpacing = 20;
@@ -133,10 +133,10 @@ Ui::Ui() {
     lv_label_set_text(containerLabel, "0");
 }
 
-void Ui::start(const Data* data) {
+void Ui::start(Data* data) {
     struct Args {
         Ui* ui;
-        const Data* data;
+        Data* data;
     };
     Args* args = new Args {this, data};
 
@@ -154,8 +154,11 @@ void Ui::start(const Data* data) {
     }, "lvgl_loop", 8 * 1024, args, 1, nullptr);
 }
 
-void Ui::loop(const Data& data) {
-    lv_label_set_text_fmt(cpuUsageLabel, "CPU %d%%", data.cpuUsage.load());
+void Ui::loop(Data& data) {
+    {
+        std::lock_guard<std::mutex> guard(data.timeMutex);
+        lv_label_set_text(timeLabel, data.time.c_str());
+    }
     
     for (size_t i = 0; i < Data::NODE_COUNT; ++i) {
         int nodeCpuUsage = data.nodeCpuUsage[i];
@@ -180,10 +183,10 @@ void Ui::loop(const Data& data) {
         lv_label_set_text_fmt(nasUsageBarValue, "%d%%", lv_bar_get_value(nasUsageBar));
     }
 
-    if (lv_bar_get_value(testBar) != data.testValue) {
-        lv_bar_set_value(testBar, data.testValue, LV_ANIM_OFF);
-        lv_obj_set_style_bg_color(testBar, utils::color_temp(lv_bar_get_value(testBar)), LV_PART_INDICATOR);
-        lv_label_set_text_fmt(testBarValue, "%d%%", lv_bar_get_value(testBar));
+    if (lv_bar_get_value(cpuUsageBar) != data.cpuUsage) {
+        lv_bar_set_value(cpuUsageBar, data.cpuUsage, LV_ANIM_OFF);
+        lv_obj_set_style_bg_color(cpuUsageBar, utils::color_temp(lv_bar_get_value(cpuUsageBar)), LV_PART_INDICATOR);
+        lv_label_set_text_fmt(cpuUsageBarValue, "%d%%", lv_bar_get_value(cpuUsageBar));
     }
     
     int value = data.podCount;

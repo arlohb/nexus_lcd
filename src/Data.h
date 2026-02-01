@@ -30,7 +30,8 @@ public:
     std::atomic<uint16_t> podCount;
     std::atomic<uint16_t> containerCount;
     std::atomic<uint8_t> nasUsage;
-    std::atomic<uint8_t> testValue;
+    std::string time;
+    std::mutex timeMutex;
     
     std::atomic<bool> isArrayOk;
     std::atomic<bool> isArrayRebuilding;
@@ -53,7 +54,7 @@ private:
     int getContainerCount();
     int getNasUsage();
     
-    int getTestValue();
+    std::string getTime();
     
     /// Returns [isArrayOk, isArrayRebuilding]
     /// Returns 1 if true, 0 if false, -1 if error

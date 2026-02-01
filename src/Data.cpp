@@ -1,6 +1,8 @@
 #include "Data.h"
 
 #include <stdlib.h>
+#include <iomanip>
+#include <sstream>
 #include <ArduinoJson.h>
 #include <HTTPClient.h>
 #include "Secrets.h"
@@ -18,7 +20,7 @@ Data::Data() :
     podCount(0),
     containerCount(0),
     nasUsage(0),
-    testValue(0),
+    time("00:00"),
     isArrayOk(true),
     isArrayRebuilding(true)
 {
@@ -109,18 +111,19 @@ Data::Data() :
                 vTaskDelay(pdMS_TO_TICKS(60000));
             }
         }, "data_nas_usage", TASK_STACK_SIZE, data, 1, nullptr);
-
+        
         xTaskCreate([] (void* arg) {
             Data* data = reinterpret_cast<Data*>(arg);
             while (true) {
-                int value = data->getTestValue();
-                if (value < 0) continue;
-                data->testValue = value;
-                ESP_LOGI("Data::data_test_value", "Test value updated");
-                vTaskDelay(pdMS_TO_TICKS(5000));
+                {
+                    std::lock_guard<std::mutex> guard(data->timeMutex);
+                    data->time = std::move(data->getTime());
+                }
+                ESP_LOGI("Data::data_time", "Time updated");
+                vTaskDelay(pdMS_TO_TICKS(60000));
             }
-        }, "data_test_value", TASK_STACK_SIZE, data, 1, nullptr);
-        
+        }, "data_time", TASK_STACK_SIZE, data, 1, nullptr);
+
         xTaskCreate([] (void* arg) {
             Data* data = reinterpret_cast<Data*>(arg);
             while (true) {
@@ -209,10 +212,13 @@ int Data::getNasUsage() {
     return (*device)["percentage"] | 0;
 }
 
-int Data::getTestValue() {
-    vTaskDelay(pdMS_TO_TICKS(rand() % 100));
-    srand(millis());
-    return rand() % 100;
+std::string Data::getTime() {
+    auto now = std::chrono::system_clock::now();
+    std::time_t time = std::chrono::system_clock::to_time_t(now);
+    std::tm* tm = std::localtime(&time);
+    std::ostringstream ss;
+    ss << std::put_time(tm, "%H:%M");
+    return ss.str();
 }
 
 std::pair<int, int> Data::getIsArrayOk() {

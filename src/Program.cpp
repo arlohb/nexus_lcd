@@ -55,6 +55,9 @@ void Program::startWifi() {
         }
         ESP_LOGI("Program::startWifi", "Connected to WiFi!");
 
+        ESP_LOGI("Program::startWifi", "Getting NTP time...");
+        configTime(0, 3600, "pool.ntp.org", "time.nist.gov");
+
         // Use randomness of WiFi connection time as a seed
         srand(static_cast<unsigned int>(millis()));
         
