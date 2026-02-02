@@ -22,7 +22,7 @@ Data::Data() :
     nasUsage(0),
     time("00:00"),
     isArrayOk(true),
-    isArrayRebuilding(true)
+    isArrayRebuilding(false)
 {
     xTaskCreate([] (void* arg) {
         Data* data = reinterpret_cast<Data*>(arg);
