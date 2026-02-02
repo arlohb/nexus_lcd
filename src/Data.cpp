@@ -147,7 +147,7 @@ Data::Data() :
 int Data::getCpuUsage() {
     String str = promQuery("cluster:node_cpu:ratio_rate5m");
     if (str.isEmpty()) {
-        ESP_LOGI("Data::getCpuUsage", "Failed to get CPU usage from Prometheus");
+        ESP_LOGW("Data::getCpuUsage", "Failed to get CPU usage from Prometheus");
         return -1;
     }
     return static_cast<int>(100 * str.toFloat());
@@ -157,7 +157,7 @@ int Data::getCpuUsage(const std::string& node) {
     String query = "instance:node_cpu_utilisation:rate5m{instance=\"" + String(node.c_str()) + ":9100\"}";
     String str = promQuery(query);
     if (str.isEmpty()) {
-        ESP_LOGI("Data::getCpuUsage", "Failed to get CPU usage for node %s from Prometheus", node.c_str());
+        ESP_LOGW("Data::getCpuUsage", "Failed to get CPU usage for node %s from Prometheus", node.c_str());
         return -1;
     }
     return static_cast<int>(100 * str.toFloat());
@@ -166,7 +166,7 @@ int Data::getCpuUsage(const std::string& node) {
 int Data::getMemUsage() {
     String str = promQuery("1 - sum(node_memory_MemAvailable_bytes) / sum(node_memory_MemTotal_bytes)");
     if (str.isEmpty()) {
-        ESP_LOGI("Data::getMemUsage", "Failed to get Memory usage from Prometheus");
+        ESP_LOGW("Data::getMemUsage", "Failed to get Memory usage from Prometheus");
         return -1;
     }
     return static_cast<int>(100 * str.toFloat());
@@ -175,7 +175,7 @@ int Data::getMemUsage() {
 int Data::getPodCount() {
     String str = promQuery("sum(kubelet_running_pods{job='kubelet'})");
     if (str.isEmpty()) {
-        ESP_LOGI("Data::getPodCount", "Failed to get Pod count from Prometheus");
+        ESP_LOGW("Data::getPodCount", "Failed to get Pod count from Prometheus");
         return -1;
     }
     return str.toInt();
@@ -184,7 +184,7 @@ int Data::getPodCount() {
 int Data::getContainerCount() {
     String str = promQuery("sum(kubelet_running_containers{job='kubelet'})");
     if (str.isEmpty()) {
-        ESP_LOGI("Data::getContainerCount", "Failed to get Container count from Prometheus");
+        ESP_LOGW("Data::getContainerCount", "Failed to get Container count from Prometheus");
         return -1;
     }
     return str.toInt();
@@ -251,7 +251,7 @@ String Data::promQuery(const String& query) {
     
     int code = http.GET();
     if (code != HTTP_CODE_OK) {
-        ESP_LOGI("Data::promQuery", "HTTP GET failed with code %d %s", code, http.errorToString(code).c_str());
+        ESP_LOGW("Data::promQuery", "HTTP GET failed with code %d %s", code, http.errorToString(code).c_str());
         http.end();
         return "";
     }
@@ -259,7 +259,7 @@ String Data::promQuery(const String& query) {
     JsonDocument doc;
     deserializeJson(doc, http.getString());
     if (doc["status"] != "success") {
-        ESP_LOGI("Data::promQuery", "Prom query not success: %s", doc["error"].as<String>().c_str());
+        ESP_LOGW("Data::promQuery", "Prom query not success: %s", doc["error"].as<String>().c_str());
         http.end();
         return "";
     }
@@ -290,7 +290,7 @@ void Data::omvLogin() {
 
     int code = http.POST(doc.as<String>());
     if (code != HTTP_CODE_OK) {
-        ESP_LOGI("Data::omvLogin", "HTTP POST failed with code %d %s", code, http.errorToString(code).c_str());
+        ESP_LOGW("Data::omvLogin", "HTTP POST failed with code %d %s", code, http.errorToString(code).c_str());
         http.end();
         return;
     }
@@ -298,7 +298,7 @@ void Data::omvLogin() {
     deserializeJson(doc, http.getString());
     
     if (!doc["error"].isNull()) {
-        ESP_LOGI("Data::omvLogin", "%s", doc["error"]["message"].as<String>().c_str());
+        ESP_LOGW("Data::omvLogin", "%s", doc["error"]["message"].as<String>().c_str());
         http.end();
         return;
     }
@@ -316,7 +316,7 @@ JsonDocument Data::omvQuery(
         ESP_LOGI("Data::omvQuery", "Cookie Jar is empty, logging in...");
         omvLogin();
         if (omvCookieJar.empty()) {
-            ESP_LOGI("Data::omvQuery", "Failed to log in to OMV");
+            ESP_LOGW("Data::omvQuery", "Failed to log in to OMV");
             return JsonDocument();
         }
     }
@@ -359,18 +359,18 @@ JsonDocument Data::omvQuery(
             omvCookieJar.clear();
             omvLogin();
             if (omvCookieJar.empty()) {
-                ESP_LOGI("OMV Query", "Failed to log in to OMV");
+                ESP_LOGW("OMV Query", "Failed to log in to OMV");
                 return JsonDocument();
             }
             // Retry the query
             return omvQuery(service, method, params);
         }
 
-        ESP_LOGI("OMV Query", "HTTP POST failed with code %d %s", code, http.errorToString(code).c_str());
+        ESP_LOGW("OMV Query", "HTTP POST failed with code %d %s", code, http.errorToString(code).c_str());
 
         // Print OMV error if available
         if (!doc.isNull() && !doc["error"].isNull()) {
-            ESP_LOGI("OMV Query", "%s", doc["error"]["message"].as<String>().c_str());
+            ESP_LOGW("OMV Query", "%s", doc["error"]["message"].as<String>().c_str());
         }
 
         http.end();
