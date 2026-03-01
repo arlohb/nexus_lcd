@@ -63,4 +63,11 @@ void Program::startWifi() {
         
         vTaskDelete(nullptr);
     }, "wifi_setup", 4096, nullptr, 1, nullptr);
+    
+    xTaskCreate([] (void* arg) {
+        // 15 minutes
+        vTaskDelay(pdMS_TO_TICKS(15 * 60 * 1000));
+        
+        ESP.restart();
+    }, "restart", 1024, nullptr, 1, nullptr);
 }
