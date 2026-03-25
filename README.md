@@ -2,7 +2,11 @@
 
 **View Prometheus data on a small IoT display**
 
-![A photo of the device](./Images/Photo.jpg)
+<img
+    src"https://github.com/arlohb/nexus_lcd/blob/main/Images/Photo.jpg"
+    alt="A photo of the device"
+    width="100"
+/>
 
 The goal of this project is constant observability of a Kubernetes cluster. It
 shows overall CPU and memory usage, and CPU usage per node. Additionally, I also
