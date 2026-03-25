@@ -3,9 +3,9 @@
 **View Prometheus data on a small IoT display**
 
 <img
-    src"https://github.com/arlohb/nexus_lcd/blob/main/Images/Photo.jpg"
+    src="https://github.com/arlohb/nexus_lcd/blob/main/Images/Photo.jpg"
     alt="A photo of the device"
-    width="100"
+    width="200"
 />
 
 The goal of this project is constant observability of a Kubernetes cluster. It
